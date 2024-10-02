@@ -1,0 +1,52 @@
+# Node.js
+node_modules/
+npm-debug.log
+yarn-debug.log
+yarn-error.log
+.env
+.env.development
+.env.production
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pids
+*.pid
+*.seed
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Sequelize
+migrations/
+seeders/
+
+# Coverage directory used by testing frameworks
+coverage/
+
+# Database
+*.sqlite
+*.sqlite3
+pgdata/
+
+# Build files
+build/
+dist/
+
+# IDEs and editors
+.vscode/
+.idea/
+
+# Docker
+docker-compose.yml
+Dockerfile
+.dockerignore
+
+# Other
+*.bak
+*.swp
+*.tmp
