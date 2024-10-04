@@ -1,8 +1,8 @@
-const { DataTypes } = require('sequelize');
+const { DataTypes } = require("sequelize");
 
 module.exports = (sequelize) => {
   sequelize.define(
-    'ImagesUrl',
+    "Image",
     {
       id: {
         type: DataTypes.UUID,
@@ -10,17 +10,9 @@ module.exports = (sequelize) => {
         primaryKey: true,
       },
       url: {
-        type: DataTypes.ARRAY(DataTypes.STRING),
+        type: DataTypes.STRING,
         allowNull: false,
-        validate: {
-          isUrlArray(value) {
-            value.forEach((url) => {
-              if (!DataTypes.STRING.isUrl.validate(url)) {
-                throw new Error(`${url} is not a valid URL`);
-              }
-            });
-          },
-        },
+        isUrl: true,
       },
       alt: {
         type: DataTypes.STRING,
