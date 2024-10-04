@@ -1,5 +1,4 @@
 const { DataTypes } = require("sequelize");
-const Role = require("./Role");
 
 module.exports = (sequelize) => {
   sequelize.define(
@@ -14,19 +13,19 @@ module.exports = (sequelize) => {
         type: DataTypes.STRING,
         allowNull: false,
       },
-      roleId: {
-        type: DataTypes.UUID,
+      email: {
+        type: DataTypes.STRING,
         allowNull: false,
-        references: {
-          model: Role,
-          key: "id",
-        },
+        unique: true,
       },
-      onUpdate: "CASCADE",
-      onDelete: "CASCADE",
+      password: {
+        type: DataTypes.STRING,
+        allowNull: false,
+      },
     },
     {
       timestamps: true,
+      paranoid: true,
     }
   );
 };
