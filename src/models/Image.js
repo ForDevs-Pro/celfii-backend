@@ -1,9 +1,8 @@
 const { DataTypes } = require('sequelize');
-const { Product } = require('./Product');
 
 module.exports = (sequelize) => {
   sequelize.define(
-    'Image',
+    'ImagesUrl',
     {
       id: {
         type: DataTypes.UUID,
@@ -11,22 +10,21 @@ module.exports = (sequelize) => {
         primaryKey: true,
       },
       url: {
-        type: DataTypes.STRING,
+        type: DataTypes.ARRAY(DataTypes.STRING),
         allowNull: false,
+        validate: {
+          isUrlArray(value) {
+            value.forEach((url) => {
+              if (!DataTypes.STRING.isUrl.validate(url)) {
+                throw new Error(`${url} is not a valid URL`);
+              }
+            });
+          },
+        },
       },
       alt: {
         type: DataTypes.STRING,
         allowNull: true,
-      },
-      productId: {
-        type: DataTypes.UUID,
-        allowNull: false,
-        references: {
-          model: Product,
-          key: 'id',
-        },
-        onUpdate: 'CASCADE',
-        onDelete: 'CASCADE',
       },
     },
     {

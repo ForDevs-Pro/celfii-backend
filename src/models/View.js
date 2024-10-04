@@ -1,5 +1,4 @@
 const { DataTypes } = require('sequelize');
-const { Product } = require('./Product');
 
 module.exports = (sequelize) => {
   sequelize.define(
@@ -10,15 +9,10 @@ module.exports = (sequelize) => {
         defaultValue: DataTypes.UUIDV4,
         primaryKey: true,
       },
-      productId: {
-        type: DataTypes.UUID,
+      counter: {
+        type: DataTypes.INTEGER,
+        defaultValue: 0,
         allowNull: false,
-        references: {
-          model: Product,
-          key: 'id',
-        },
-        onUpdate: 'CASCADE',
-        onDelete: 'CASCADE',
       },
     },
     {
