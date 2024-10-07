@@ -32,7 +32,6 @@ const updateImageController = async (id, url, alt) => {
     if (affectedRows === 0) {
       throw new Error("Image not found");
       }
-      console.log(updatedImages)
     return updatedImages[0];
   } catch (error) {
     console.error("Error updating image:", error);
