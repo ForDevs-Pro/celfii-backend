@@ -21,17 +21,19 @@ const createImageController = async (url, alt) => {
 
 const updateImageController = async (id, url, alt) => {
   try {
-    const imageToUpdate = await Image.findByPk(id);
-    if (!imageToUpdate) {
+    const [affectedRows, updatedImages] = await Image.update(
+      { url, alt },
+      {
+        where: { id },
+        returning: true,
+      }
+    );
+
+    if (affectedRows === 0) {
       throw new Error("Image not found");
-    }
-
-    await imageToUpdate.update({
-      url,
-      alt,
-    });
-
-    return imageToUpdate;
+      }
+      console.log(updatedImages)
+    return updatedImages[0];
   } catch (error) {
     console.error("Error updating image:", error);
     throw new Error("Image update failed");

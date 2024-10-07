@@ -52,7 +52,7 @@ const updateCategoryController = async (name, id) => {
         where: { id },
         returning: true,
       }
-    ); // returning: true devuelve la categoría actualizada
+    );
     if (!updated) throw new Error("Category not found");
     return updatedCategory;
   } catch (error) {
