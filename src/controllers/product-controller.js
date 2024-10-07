@@ -50,17 +50,17 @@ const createProductController = async (productData) => {
 
 const updateProductByIdController = async (productData, id) => {
   try {
-    const updatedProduct = await product.update(
+    const [affectedRow, updatedProduct] = await Product.update(
       {
-        name: productData.name ?? product.name,
-        description: productData.description ?? product.description,
-        price: productData.price ?? product.price,
-        stock: productData.stock ?? product.stock,
+        name: productData.name,
+        description: productData.description,
+        price: productData.price,
+        stock: productData.stock,
       },
       { where: { id }, returning: true }
     );
 
-    if (!updatedProduct) throw new Error("Product not found");
+    if (!affectedRow) throw new Error("Product not found");
 
     // if (productData.images) {
     //   const imageInstances = await createImages(productData.images);
@@ -72,7 +72,7 @@ const updateProductByIdController = async (productData, id) => {
     //   await product.setCategory(categoryInstances);
     // }
 
-    return updatedProduct;
+    return updatedProduct[0];
   } catch (error) {
     console.error("Error creating a product", error);
     throw new Error(`Error creating a product: ${error.message}`);
