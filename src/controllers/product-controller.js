@@ -16,7 +16,7 @@ const getAllProductsController = async (queries) => {
 const getProductByIdController = async (id) => {
   try {
     const product = await Product.findByPk(id, { include: getProductIncludes() });
-    await addView(product.id)
+    await addView(product.id);
     return product;
   } catch (error) {
     console.error(`Error fetching product with id ${id}`, error);
@@ -34,7 +34,7 @@ const createProductController = async (productData) => {
 
     if (!created) throw new Error("This product already exists in the database!");
 
-    await createView(product.id)
+    await createView(product.id);
     // const imageInstances = await createImages(images);
     // const categoryInstances = await categoryImages(category);
     // await product.addImages(imageInstances);
@@ -50,32 +50,28 @@ const createProductController = async (productData) => {
 
 const updateProductByIdController = async (productData, id) => {
   try {
-    const product = await Product.findByPk(id);
-    if (!product) throw new Error("Product not found");
+   const updatedProduct = await product.update(
+      {
+        name: productData.name ?? product.name,
+        description: productData.description ?? product.description,
+        price: productData.price ?? product.price,
+        stock: productData.stock ?? product.stock,
+      },
+      { where: { id }, returning: true }
+    );
 
-    await product.update({
-      name: productData.name ?? product.name,
-      description: productData.description ?? product.description,
-      price: productData.price ?? product.price,
-      stock: productData.stock ?? product.stock,
-    });
+    if (!updatedProduct) throw new Error("Product not found");
 
-    if (productData.view) {
-      const viewInstance = await updateView(productData.view);
-      await product.setView(viewInstance);
-    }
+    // if (productData.images) {
+    //   const imageInstances = await createImages(productData.images);
+    //   await product.setImages(imageInstances);
+    // }
 
-    if (productData.images) {
-      const imageInstances = await createImages(productData.images);
-      await product.setImages(imageInstances);
-    }
+    // if (productData.category) {
+    //   const categoryInstances = await createImages(productData.category);
+    //   await product.setCategory(categoryInstances);
+    // }
 
-    if (productData.category) {
-      const categoryInstances = await createImages(productData.category);
-      await product.setCategory(categoryInstances);
-    }
-
-    const updatedProduct = await getProductByIdController(id);
     return updatedProduct;
   } catch (error) {
     console.error("Error creating a product", error);
