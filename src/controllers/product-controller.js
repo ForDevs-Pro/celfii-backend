@@ -50,7 +50,7 @@ const createProductController = async (productData) => {
 
 const updateProductByIdController = async (productData, id) => {
   try {
-   const updatedProduct = await product.update(
+    const updatedProduct = await product.update(
       {
         name: productData.name ?? product.name,
         description: productData.description ?? product.description,
