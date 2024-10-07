@@ -1,9 +1,13 @@
 const { User } = require('../db');
 const { Op } = require('sequelize');
+const bcrypt = require('bcrypt');
 
 const createUserController = async (userData) => {
   try {
-    const newUser = await User.create(userData);
+    const hashedPassword = await bcrypt.hash(userData.password, 10);
+    const newUserData = { ...userData, password: hashedPassword };
+
+    const newUser = await User.create(newUserData);
     return newUser;
   } catch (error) {
     console.error('Error creating user: ' + error.message);
@@ -12,22 +16,22 @@ const createUserController = async (userData) => {
 };
 
 const getAllUsersController = async (includeDeleted = false) => {
-    try {
-      let whereClause = {};
-  
-      if (includeDeleted) {
-        whereClause = { deletedAt: { [Op.ne]: null } }; 
-      }
-      const users = await User.findAll({
-        where: whereClause,
-        paranoid: !includeDeleted, 
-      });
-      return users;
-    } catch (error) {
-      console.error('Error fetching users: ' + error.message);
-      throw new Error('Error fetching users: ' + error.message);
+  try {
+    let whereClause = {};
+
+    if (includeDeleted) {
+      whereClause = { deletedAt: { [Op.ne]: null } };
     }
-  };
+    const users = await User.findAll({
+      where: whereClause,
+      paranoid: !includeDeleted,
+    });
+    return users;
+  } catch (error) {
+    console.error('Error fetching users: ' + error.message);
+    throw new Error('Error fetching users: ' + error.message);
+  }
+};
 
 const getUserByIdController = async (id) => {
   try {
