@@ -37,8 +37,8 @@ Role.belongsTo(User, { foreignKey: "userId", as: "user" });
 Category.hasOne(Product, { foreignKey: "categoryId", as: "product" });
 Product.belongsTo(Category, { foreignKey: "categoryId", as: "category" });
 
-Product.hasOne(View, { foreignKey: "viewId", as: "view", onDelete: "CASCADE" });
-View.belongsTo(Product, { foreignKey: "viewId", as: "product" });
+Product.hasOne(View, { foreignKey: "productId", as: "view", onDelete: "CASCADE" });
+View.belongsTo(Product, { foreignKey: "productId", as: "product" });
 
 Product.hasMany(Image, { foreignKey: "productId", as: "images", onDelete: "CASCADE" });
 Image.belongsTo(Product, { foreignKey: "productId", as: "product" });
