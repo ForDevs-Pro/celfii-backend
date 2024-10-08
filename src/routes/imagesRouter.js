@@ -3,7 +3,7 @@ const {
     createImage,
     updateImage,
     deleteImage,
-} = require('../handler/images-handler')
+} = require('../handlers/images-handler')
 
 const imageRouter = Router()
 

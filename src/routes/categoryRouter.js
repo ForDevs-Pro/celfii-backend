@@ -5,7 +5,7 @@ const {
   createCategory,
   updateCategory,
   deleteCategory,
-} = require("../handler/category-handler");
+} = require("../handlers/category-handler");
 
 const categoryRouter = Router();
 
