@@ -17,8 +17,6 @@ const createUserController = async (userData) => {
 
 const getAllUsersController = async (includeDeleted = false) => {
   try {
-    if (includeDeleted) {
-    }
     const users = await User.findAll({
       paranoid: !includeDeleted,
     });
