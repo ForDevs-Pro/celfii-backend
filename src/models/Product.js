@@ -5,9 +5,10 @@ module.exports = (sequelize) => {
     "Product",
     {
       id: {
-        type: DataTypes.UUID,
-        defaultValue: DataTypes.UUIDV4,
+        type: DataTypes.STRING,
         primaryKey: true,
+        allowNull: false,
+        unique: true,
       },
       name: {
         type: DataTypes.STRING,
@@ -18,7 +19,11 @@ module.exports = (sequelize) => {
         allowNull: false,
         defaultValue: "Sin descripción disponible",
       },
-      price: {
+      priceArs: {
+        type: DataTypes.DECIMAL(10, 2),
+        allowNull: false,
+      },
+      priceUsd: {
         type: DataTypes.DECIMAL(10, 2),
         allowNull: false,
       },
@@ -26,6 +31,14 @@ module.exports = (sequelize) => {
         type: DataTypes.INTEGER,
         allowNull: false,
         defaultValue: 0,
+      },
+      code: {
+        type: DataTypes.STRING,
+        allowNull: true,
+      },
+      imei: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
       },
     },
     { timestamps: true, paranoid: true }
