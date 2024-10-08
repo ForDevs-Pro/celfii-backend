@@ -17,13 +17,9 @@ const createUserController = async (userData) => {
 
 const getAllUsersController = async (includeDeleted = false) => {
   try {
-    let whereClause = {};
-
     if (includeDeleted) {
-      whereClause = { deletedAt: { [Op.ne]: null } };
     }
     const users = await User.findAll({
-      where: whereClause,
       paranoid: !includeDeleted,
     });
     return users;
