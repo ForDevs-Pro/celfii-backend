@@ -16,7 +16,9 @@ module.exports = (sequelize) => {
         allowNull: false,
       },
       productId: {
-        type: DataTypes.UUID,
+        type: DataTypes.STRING,
+        allowNull: false,
+        unique: true,
         references: {
           model: Product,
           key: 'id',

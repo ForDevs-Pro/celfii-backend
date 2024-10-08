@@ -1,6 +1,11 @@
 const { Product } = require("../db");
-const { createView, addView } = require("./view-controller");
-const { getProductData, getProductIncludes } = require("../utils/product-util");
+const { addView } = require("./view-controller");
+const {
+  getProductData,
+  getProductIncludes,
+  setProductAssociations,
+  addProductAssociations,
+} = require("../utils/product-util");
 
 const getAllProductsController = async (queries) => {
   try {
@@ -26,22 +31,22 @@ const getProductByIdController = async (id) => {
 
 const createProductController = async (productData) => {
   try {
-    const { images, category, ...productInfo } = productData;
     const [product, created] = await Product.findOrCreate({
-      where: { name: productInfo.name },
-      defaults: productInfo,
+      where: { id: productData.id },
+      defaults: {
+        name: productData.name,
+        description: productData.description,
+        priceArs: productData.priceArs,
+        priceUsd: productData.priceUsd,
+        stock: productData.stock,
+        code: productData.code,
+      },
     });
 
     if (!created) throw new Error("This product already exists in the database!");
-
-    await createView(product.id);
-    // const imageInstances = await createImages(images);
-    // const categoryInstances = await categoryImages(category);
-    // await product.addImages(imageInstances);
-    // await product.addCategory(categoryInstances);
-
-    const newProduct = await getProductByIdController(product.id);
-    return newProduct;
+    await addProductAssociations(productData, product);
+    
+    return await Product.findByPk(productData.id, { include: getProductIncludes() });
   } catch (error) {
     console.error("Error creating a product", error);
     throw new Error(`Error creating a product: ${error.message}`);
@@ -50,32 +55,31 @@ const createProductController = async (productData) => {
 
 const updateProductByIdController = async (productData, id) => {
   try {
+    await setProductAssociations(productData);
     const [affectedRows, updatedProduct] = await Product.update(
       {
+        id: productData.id,
         name: productData.name,
         description: productData.description,
-        price: productData.price,
+        priceArs: productData.priceArs,
+        priceUsd: productData.priceUsd,
         stock: productData.stock,
+        code: productData.code,
       },
-      { where: { id }, returning: true }
+      {
+        where: { id },
+        returning: true,
+        include: getProductIncludes(),
+      }
     );
-
+    console.log(affectedRows, updatedProduct);
+    
     if (!affectedRows) throw new Error("Product not found");
-
-    // if (productData.images) {
-    //   const imageInstances = await createImages(productData.images);
-    //   await product.setImages(imageInstances);
-    // }
-
-    // if (productData.category) {
-    //   const categoryInstances = await createImages(productData.category);
-    //   await product.setCategory(categoryInstances);
-    // }
 
     return updatedProduct[0];
   } catch (error) {
-    console.error("Error creating a product", error);
-    throw new Error(`Error creating a product: ${error.message}`);
+    console.error("Error updating a product", error);
+    throw new Error(`Error updating a product: ${error.message}`);
   }
 };
 
@@ -93,22 +97,17 @@ const deleteProductByIdController = async (id) => {
 
 const restoreProductByIdController = async (id) => {
   try {
-		const product = await Product.findOne({
-			where: { id },
-			paranoid: false,
-			include: getProductIncludes(),
-		})
-		if (!product) throw new Error('No deleted product found with the given id')
-		await product.restore()
-		const restoredProduct = await Product.findOne({
+    const product = await Product.findOne({
       where: { id },
-      include: getProductIncludes(),
+      paranoid: false,
     });
-    return restoredProduct;
-	} catch (error) {
-		console.error('Error restoring product', error)
-		throw new Error('Error restoring product')
-	}
+    if (!product) throw new Error("No deleted product found with the given id");
+    await product.restore();
+    return product;
+  } catch (error) {
+    console.error("Error restoring product", error);
+    throw new Error("Error restoring product");
+  }
 };
 
 module.exports = {
@@ -117,5 +116,5 @@ module.exports = {
   createProductController,
   updateProductByIdController,
   deleteProductByIdController,
-  restoreProductByIdController
+  restoreProductByIdController,
 };
