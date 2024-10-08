@@ -5,7 +5,7 @@ const {
   getProductById,
   updateProductById,
   deleteProductById,
-  restoreProductById
+  restoreProductById,
 } = require("../handlers/product-handler");
 
 const productRouter = Router();

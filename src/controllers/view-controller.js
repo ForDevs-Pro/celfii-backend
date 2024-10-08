@@ -17,7 +17,7 @@ const addView = async (productId) => {
       view.counter += 1;
       await view.save();
     }
-    return
+    return;
   } catch (error) {
     console.error("Error updating a view", error);
     throw new Error(`Error updating a view: ${error.message}`);
@@ -26,5 +26,5 @@ const addView = async (productId) => {
 
 module.exports = {
   createView,
-  addView
+  addView,
 };

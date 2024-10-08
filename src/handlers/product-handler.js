@@ -4,7 +4,7 @@ const {
   createProductController,
   updateProductByIdController,
   deleteProductByIdController,
-  restoreProductByIdController
+  restoreProductByIdController,
 } = require("../controllers/product-controller");
 
 const getAllProducts = async (req, res) => {
@@ -74,5 +74,5 @@ module.exports = {
   getProductById,
   updateProductById,
   deleteProductById,
-  restoreProductById
+  restoreProductById,
 };

@@ -45,7 +45,7 @@ const createProductController = async (productData) => {
 
     if (!created) throw new Error("This product already exists in the database!");
     await addProductAssociations(productData, product);
-    
+
     return await Product.findByPk(productData.id, { include: getProductIncludes() });
   } catch (error) {
     console.error("Error creating a product", error);
@@ -73,7 +73,7 @@ const updateProductByIdController = async (productData, id) => {
       }
     );
     console.log(affectedRows, updatedProduct);
-    
+
     if (!affectedRows) throw new Error("Product not found");
 
     return updatedProduct[0];

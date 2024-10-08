@@ -1,5 +1,5 @@
-const { createView } = require("../controllers/view-controller")
-const { Product, View, Image, Caetgory } = require("../db");
+const { createView } = require("../controllers/view-controller");
+const { Product, View } = require("../db");
 const { Op } = require("sequelize");
 
 const orderOptions = {
@@ -31,14 +31,14 @@ const getProductData = ({ name, sort, page = 1, pageSize = 10, onlyDeleted = fal
 const addProductAssociations = async (productData, product) => {
   try {
     await createView(product.id);
-    
+
     if (productData.images) {
       const imageInstances = await createImages(productData.images);
       await product.addImages(imageInstances);
     }
 
     if (productData.category) {
-      const categoryInstances = await getOrCreateCategory(productData.category);
+      const categoryInstances = await createCategory(productData.category);
       await product.addCategory(categoryInstances);
     }
   } catch (error) {
