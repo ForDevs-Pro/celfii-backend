@@ -5,6 +5,7 @@ const {
   getProductById,
   updateProductById,
   deleteProductById,
+  restoreProductById
 } = require("../handlers/product-handler");
 
 const productRouter = Router();
@@ -13,5 +14,6 @@ productRouter.get("/", getAllProducts);
 productRouter.get("/:id", getProductById);
 productRouter.put("/:id", updateProductById);
 productRouter.delete("/:id", deleteProductById);
+productRouter.post("/:id", restoreProductById);
 
 module.exports = productRouter;

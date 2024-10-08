@@ -50,7 +50,7 @@ const createProductController = async (productData) => {
 
 const updateProductByIdController = async (productData, id) => {
   try {
-    const [affectedRow, updatedProduct] = await Product.update(
+    const [affectedRows, updatedProduct] = await Product.update(
       {
         name: productData.name,
         description: productData.description,
@@ -60,7 +60,7 @@ const updateProductByIdController = async (productData, id) => {
       { where: { id }, returning: true }
     );
 
-    if (!affectedRow) throw new Error("Product not found");
+    if (!affectedRows) throw new Error("Product not found");
 
     // if (productData.images) {
     //   const imageInstances = await createImages(productData.images);
@@ -91,10 +91,31 @@ const deleteProductByIdController = async (id) => {
   }
 };
 
+const restoreProductByIdController = async (id) => {
+  try {
+		const product = await Product.findOne({
+			where: { id },
+			paranoid: false,
+			include: getProductIncludes(),
+		})
+		if (!product) throw new Error('No deleted product found with the given id')
+		await product.restore()
+		const restoredProduct = await Product.findOne({
+      where: { id },
+      include: getProductIncludes(),
+    });
+    return restoredProduct;
+	} catch (error) {
+		console.error('Error restoring product', error)
+		throw new Error('Error restoring product')
+	}
+};
+
 module.exports = {
   getAllProductsController,
   getProductByIdController,
   createProductController,
   updateProductByIdController,
   deleteProductByIdController,
+  restoreProductByIdController
 };
