@@ -2,7 +2,7 @@ const {
   createImageController,
   updateImageController,
   deleteImageController,
-} = require("../controller/images-controller");
+} = require("../controllers/images-controller");
 
 const createImage = async (req, res) => {
   try {

@@ -4,7 +4,7 @@ const {
   getCategoriesByIdController,
   updateCategoryController,
   deleteCategoryController,
-} = require("../controller/category-controller");
+} = require("../controllers/category-controller");
 
 const getAllCategories = async (req, res) => {
   try {
