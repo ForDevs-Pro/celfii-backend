@@ -12,6 +12,7 @@ const getSheetDataController = async () => {
     'category',
     'stock',
     'createdAt',
+    'isDeleted',
   ];
   const client = new google.auth.JWT(
     process.env.GOOGLE_SHEETS_CLIENT_EMAIL,
@@ -23,7 +24,7 @@ const getSheetDataController = async () => {
   const sheets = google.sheets({ version: 'v4', auth: client });
 
   const spreadsheetId = process.env.GOOGLE_SHEETS_SPREADSHEET_ID;
-  const range = 'Articulos!A:I';
+  const range = 'Articulos!A:J';
   try {
     const response = await sheets.spreadsheets.values.get({
       spreadsheetId,
@@ -97,7 +98,7 @@ const createDataSheetController = async (productData) => {
   }
 };
 
-const updateDataSheetByIdController = async (productData, id) => {
+const updateDataSheetByIdController = async (productData, id, isDeleted = false) => {
   try {
     const client = new google.auth.JWT(
       process.env.GOOGLE_SHEETS_CLIENT_EMAIL,
@@ -108,7 +109,6 @@ const updateDataSheetByIdController = async (productData, id) => {
     const sheets = google.sheets({ version: 'v4', auth: client });
 
     const spreadsheetId = process.env.GOOGLE_SHEETS_SPREADSHEET_ID;
-    const range = 'Articulos!A:I';
     const products = await getSheetDataController();
     const productIndex = products.findIndex((product) => product.id === id);
 
@@ -117,7 +117,7 @@ const updateDataSheetByIdController = async (productData, id) => {
     }
 
     const rowNumber = productIndex + 2;
-    const newRange = `Articulos!A${rowNumber}:I${rowNumber}`;
+    const newRange = `Articulos!A${rowNumber}:J${rowNumber}`;
     const updatedRow = [
       productData.name,
       productData.priceArs,
@@ -128,6 +128,7 @@ const updateDataSheetByIdController = async (productData, id) => {
       productData.category,
       productData.stock,
       new Date().toISOString(),
+      isDeleted ? 'TRUE' : 'FALSE',
     ];
     await sheets.spreadsheets.values.update({
       spreadsheetId,
@@ -135,6 +136,7 @@ const updateDataSheetByIdController = async (productData, id) => {
       valueInputOption: 'RAW',
       resource: { values: [updatedRow] },
     });
+
     return { message: 'Product updated successfully' };
   } catch (error) {
     console.error('Error updating product in Google Sheets', error);
@@ -151,7 +153,7 @@ const deleteDataSheetByIdController = async (id) => {
       throw new Error('Product not found');
     }
     products[productIndex].isDeleted = true;
-    await updateDataSheetByIdController(products[productIndex], id);
+    await updateDataSheetByIdController(products[productIndex], id, true);
     return { message: 'Product marked as deleted' };
   } catch (error) {
     console.error('Error deleting product in Google Sheets', error);

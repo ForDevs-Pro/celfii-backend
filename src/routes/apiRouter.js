@@ -15,5 +15,4 @@ googleApiRouter.post('/', createProduct);
 googleApiRouter.put('/:id', updateProductById);
 googleApiRouter.delete('/:id', deleteProductById);
 
-// Exportar el router
 module.exports = googleApiRouter;

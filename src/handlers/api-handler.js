@@ -4,9 +4,8 @@ const {
   createDataSheetController,
   updateDataSheetByIdController,
   deleteDataSheetByIdController,
-} = require('../controllers/api-controller');
+} = require('../services/api-service');
 
-// Handler para obtener todos los productos desde Google Sheets
 const getSheetData = async (req, res) => {
   try {
     const response = await getSheetDataController();
@@ -16,7 +15,6 @@ const getSheetData = async (req, res) => {
   }
 };
 
-// Handler para obtener un producto por ID desde Google Sheets
 const getProductById = async (req, res) => {
   const { id } = req.params;
   try {
@@ -27,7 +25,6 @@ const getProductById = async (req, res) => {
   }
 };
 
-// Handler para crear un producto en Google Sheets
 const createProduct = async (req, res) => {
   try {
     const productData = req.body;
@@ -38,7 +35,6 @@ const createProduct = async (req, res) => {
   }
 };
 
-// Handler para actualizar un producto por ID en Google Sheets
 const updateProductById = async (req, res) => {
   const { id } = req.params;
   try {
@@ -50,7 +46,6 @@ const updateProductById = async (req, res) => {
   }
 };
 
-// Handler para eliminar (borrar lógicamente) un producto por ID en Google Sheets
 const deleteProductById = async (req, res) => {
   const { id } = req.params;
   try {
@@ -61,7 +56,6 @@ const deleteProductById = async (req, res) => {
   }
 };
 
-// Exportar todos los handlers
 module.exports = {
   getSheetData,
   getProductById,
