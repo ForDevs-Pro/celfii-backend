@@ -2,7 +2,8 @@ const { createProductController } = require('./controllers/product-controller');
 const { createRoleController } = require('./controllers/roleController');
 const { getSheetDataService } = require('./services/api-service');
 const { createCategoryController } = require('./controllers/category-controller');
-const { Category } = require('./db');
+const { createUserController } = require('./controllers/userController');
+const { Category, Role } = require('./db');
 
 const normalizeNumber = (value) => {
   if (typeof value === 'string') {
@@ -71,10 +72,36 @@ const createProducts = async (sheetData) => {
   }
 };
 
+const createUser = async () => {
+  const masterUserData = {
+    username: 'celfii',
+    email: 'celfii@celfii.com',
+    password: 'celfii123',
+  };
+
+  try {
+    const roleMaster = await Role.findOne({ where: { name: 'Master' } });
+    if (!roleMaster) {
+      console.error('Rol Master no encontrado para crear el usuario.');
+      return;
+    }
+    const newUser = await createUserController({
+      ...masterUserData,
+      roleId: roleMaster.id,
+    });
+    console.log(`Usuario Master ${masterUserData.username} creado correctamente.`);
+    console.log(`Rol ${roleMaster.name} asignado al usuario ${newUser.username}.`);
+  } catch (error) {
+    console.error(`Error al crear el usuario Master: ${error.message}`);
+  }
+};
+
 const createSeeders = async () => {
   try {
     const roles = ['Master', 'Admin'];
+
     await createRoles(roles);
+    await createUser();
 
     const sheetData = await getSheetDataService();
 
