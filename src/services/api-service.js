@@ -1,8 +1,8 @@
 const { google } = require('googleapis');
 require('dotenv').config();
 
-const getSheetDataController = async () => {
-  const props = [
+const getSheetDataService = async () => {
+  const propsSheet1 = [
     'name',
     'priceArs',
     'priceUsd',
@@ -14,6 +14,9 @@ const getSheetDataController = async () => {
     'createdAt',
     'isDeleted',
   ];
+
+  const propsSheet2 = ['id', 'imei', 'name', 'priceArs', 'priceUsd'];
+
   const client = new google.auth.JWT(
     process.env.GOOGLE_SHEETS_CLIENT_EMAIL,
     null,
@@ -22,33 +25,47 @@ const getSheetDataController = async () => {
   );
 
   const sheets = google.sheets({ version: 'v4', auth: client });
-
   const spreadsheetId = process.env.GOOGLE_SHEETS_SPREADSHEET_ID;
-  const range = 'Articulos!A:J';
-  try {
-    const response = await sheets.spreadsheets.values.get({
-      spreadsheetId,
-      range,
-    });
 
-    const rows = response.data.values.slice(1);
-    if (rows.length) {
-      return rows.map((row) =>
-        row.reduce((acc, item, index) => {
-          acc[props[index]] = item;
-          return acc;
-        }, {})
-      );
-    } else return [];
+  const ranges = ['Articulos!A:J', 'Stock equipos!A:E'];
+
+  try {
+    const responses = await Promise.all(
+      ranges.map((range) =>
+        sheets.spreadsheets.values.get({
+          spreadsheetId,
+          range,
+        })
+      )
+    );
+
+    const rowsSheet1 = responses[0].data.values.slice(1);
+    const processedSheet1 = rowsSheet1.map((row) =>
+      row.reduce((acc, item, index) => {
+        acc[propsSheet1[index]] = item;
+        return acc;
+      }, {})
+    );
+
+    const rowsSheet2 = responses[1].data.values.slice(1);
+    const processedSheet2 = rowsSheet2.map((row) =>
+      row.reduce((acc, item, index) => {
+        acc[propsSheet2[index]] = item;
+        return acc;
+      }, {})
+    );
+    const allRows = [...processedSheet1, ...processedSheet2];
+
+    return allRows;
   } catch (error) {
     console.error('Error al acceder a Google Sheets API:', error);
     throw new Error(`Error al acceder a Google Sheets API: ${error}`);
   }
 };
 
-const getDataSheetByIdController = async (id) => {
+const getDataSheetByIdService = async (id) => {
   try {
-    const products = await getSheetDataController();
+    const products = await getSheetDataService();
     const product = products.find((product) => product.id === id);
     if (!product) {
       throw new Error(`Product with id ${id} not found`);
@@ -60,7 +77,7 @@ const getDataSheetByIdController = async (id) => {
   }
 };
 
-const createDataSheetController = async (productData) => {
+const createDataSheetService = async (productData) => {
   try {
     const client = new google.auth.JWT(
       process.env.GOOGLE_SHEETS_CLIENT_EMAIL,
@@ -98,7 +115,7 @@ const createDataSheetController = async (productData) => {
   }
 };
 
-const updateDataSheetByIdController = async (productData, id, isDeleted = false) => {
+const updateDataSheetByIdService = async (productData, id, isDeleted = false) => {
   try {
     const client = new google.auth.JWT(
       process.env.GOOGLE_SHEETS_CLIENT_EMAIL,
@@ -109,7 +126,7 @@ const updateDataSheetByIdController = async (productData, id, isDeleted = false)
     const sheets = google.sheets({ version: 'v4', auth: client });
 
     const spreadsheetId = process.env.GOOGLE_SHEETS_SPREADSHEET_ID;
-    const products = await getSheetDataController();
+    const products = await getSheetDataService();
     const productIndex = products.findIndex((product) => product.id === id);
 
     if (productIndex === -1) {
@@ -144,16 +161,16 @@ const updateDataSheetByIdController = async (productData, id, isDeleted = false)
   }
 };
 
-const deleteDataSheetByIdController = async (id) => {
+const deleteDataSheetByIdService = async (id) => {
   try {
-    const products = await getSheetDataController();
+    const products = await getSheetDataService();
     const productIndex = products.findIndex((product) => product.id === id);
 
     if (productIndex === -1) {
       throw new Error('Product not found');
     }
     products[productIndex].isDeleted = true;
-    await updateDataSheetByIdController(products[productIndex], id, true);
+    await updateDataSheetByIdService(products[productIndex], id, true);
     return { message: 'Product marked as deleted' };
   } catch (error) {
     console.error('Error deleting product in Google Sheets', error);
@@ -162,9 +179,9 @@ const deleteDataSheetByIdController = async (id) => {
 };
 
 module.exports = {
-  getSheetDataController,
-  getDataSheetByIdController,
-  createDataSheetController,
-  updateDataSheetByIdController,
-  deleteDataSheetByIdController,
+  getSheetDataService,
+  getDataSheetByIdService,
+  createDataSheetService,
+  updateDataSheetByIdService,
+  deleteDataSheetByIdService,
 };
