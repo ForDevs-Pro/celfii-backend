@@ -42,6 +42,7 @@ const createProductController = async (productData) => {
         code: productData.code,
         imei: productData.imei,
         deletedAt: productData.isDeleted ? new Date() : null,
+        categoryId: productData.categoryId,
       },
     });
 
