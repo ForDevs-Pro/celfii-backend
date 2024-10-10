@@ -1,4 +1,5 @@
 const { createProductController } = require('./controllers/product-controller');
+const { createRoleController } = require('./controllers/roleController');
 const { getSheetDataService } = require('./services/api-service');
 
 const normalizeNumber = (value) => {
@@ -12,6 +13,16 @@ const normalizeNumber = (value) => {
 
 const createSeeders = async () => {
   try {
+    const roles = ['Master', 'Admin'];
+    for (const roleName of roles) {
+      try {
+        await createRoleController(roleName);
+        console.log(`Rol ${roleName} creado correctamente.`);
+      } catch (error) {
+        console.error(`Error al crear el rol ${roleName}: ${error.message}`);
+      }
+    }
+
     const sheetData = await getSheetDataService();
 
     for (let i = 0; i < sheetData.length; i++) {
