@@ -37,7 +37,7 @@ module.exports = (sequelize) => {
         allowNull: true,
       },
       imei: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.STRING,
         allowNull: true,
       },
     },

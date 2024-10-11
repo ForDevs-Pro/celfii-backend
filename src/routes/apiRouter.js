@@ -1,18 +1,18 @@
 const { Router } = require('express');
 const {
   getSheetData,
-  getProductById,
-  createProduct,
-  updateProductById,
-  deleteProductById,
+  getProductSheetById,
+  createProductSheet,
+  updateProductSheetById,
+  deleteProductSheetById,
 } = require('../handlers/api-handler');
 
 const googleApiRouter = Router();
 
 googleApiRouter.get('/', getSheetData);
-googleApiRouter.get('/:id', getProductById);
-googleApiRouter.post('/', createProduct);
-googleApiRouter.put('/:id', updateProductById);
-googleApiRouter.delete('/:id', deleteProductById);
+googleApiRouter.get('/:id', getProductSheetById);
+googleApiRouter.post('/', createProductSheet);
+googleApiRouter.put('/:id', updateProductSheetById);
+googleApiRouter.delete('/:id', deleteProductSheetById);
 
 module.exports = googleApiRouter;
