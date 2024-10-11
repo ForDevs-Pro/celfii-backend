@@ -1,12 +1,20 @@
-const { User } = require('../db');
-const { Op } = require('sequelize');
+const { User, Role } = require('../db');
 const bcrypt = require('bcrypt');
 
 const createUserController = async (userData) => {
   try {
     const hashedPassword = await bcrypt.hash(userData.password, 10);
-    const newUserData = { ...userData, password: hashedPassword };
 
+    let roleId = userData.roleId;
+
+    if (!roleId) {
+      const adminRole = await Role.findOne({ where: { name: 'Admin' } });
+      if (!adminRole) {
+        throw new Error('Role "Admin" not found, please run the seeder.');
+      }
+      roleId = adminRole.id;
+    }
+    const newUserData = { ...userData, password: hashedPassword, roleId };
     const newUser = await User.create(newUserData);
     return newUser;
   } catch (error) {
