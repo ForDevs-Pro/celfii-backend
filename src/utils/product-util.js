@@ -4,8 +4,9 @@ const { Op } = require("sequelize");
 
 const orderOptions = {
   "most popular": [["view", "DESC"]],
-  "highest price": [["price", "DESC"]],
-  "lowest price": [["price", "ASC"]],
+  "highest price": [["priceArs", "DESC"]],
+  "lowest price": [["priceArs", "ASC"]],
+  "newest": [["createdAt", "DESC"]],
 };
 
 const getProductIncludes = () => [
@@ -14,7 +15,7 @@ const getProductIncludes = () => [
   // { model: Caetgory, as: "category" },
 ];
 
-const getProductData = ({ name, sort, page = 1, pageSize = 10, onlyDeleted = false }) => {
+const getProductData = ({ name, sort, page = 1, pageSize = 10, onlyDeleted = false, minPrice, maxPrice }) => {
   const paranoid = !onlyDeleted;
   const order = orderOptions[sort] || [];
   const include = getProductIncludes();
@@ -23,6 +24,8 @@ const getProductData = ({ name, sort, page = 1, pageSize = 10, onlyDeleted = fal
   const where = {
     ...(onlyDeleted ? { deletedAt: { [Op.ne]: null } } : {}),
     ...(name && { [Op.or]: [{ name: { [Op.iLike]: `%${name}%` } }] }),
+    ...(minPrice && { priceArs: { [Op.gte]: parseFloat(minPrice) } }),
+    ...(maxPrice && { priceArs: { [Op.lte]: parseFloat(maxPrice) } }),
   };
 
   return { limit, offset, order, where, include, paranoid };
