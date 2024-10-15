@@ -9,7 +9,7 @@ const checkMaster = (req, res, next) => {
     req.user = response;
 
     if (req.user.role !== 'Master') {
-      return res.status(403).send('Access denied: Admins only');
+      return res.status(403).send('Access denied: Admin Master only');
     }
 
     next();

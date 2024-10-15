@@ -6,7 +6,6 @@ const loginUser = async (req, res) => {
     const response = await loginUserController(email, password);
     return res.status(200).json(response);
   } catch (error) {
-    console.error('Login error:', error);
     res.status(401).json(error);
   }
 };
