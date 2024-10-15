@@ -29,7 +29,7 @@ let entries = Object.entries(sequelize.models);
 let capsEntries = entries.map((entry) => [entry[0][0].toUpperCase() + entry[0].slice(1), entry[1]]);
 sequelize.models = Object.fromEntries(capsEntries);
 
-const { Category, Image, Product, Role, User, View } = sequelize.models;
+const { Category, Image, Product, Role, User, View, Cart } = sequelize.models;
 
 User.belongsTo(Role, { foreignKey: 'roleId', as: 'role' });
 Role.hasMany(User, { foreignKey: 'roleId', as: 'users' });
@@ -42,6 +42,9 @@ View.belongsTo(Product, { foreignKey: 'productId', as: 'product' });
 
 Product.hasMany(Image, { foreignKey: 'productId', as: 'images', onDelete: 'CASCADE' });
 Image.belongsTo(Product, { foreignKey: 'productId', as: 'product' });
+
+Cart.belongsTo(Product, { foreignKey: 'productId', as: 'product' });
+Product.hasMany(Cart, { foreignKey: 'productId', as: 'carts' });
 
 module.exports = {
   ...sequelize.models,
