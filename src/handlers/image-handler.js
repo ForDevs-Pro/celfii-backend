@@ -39,7 +39,8 @@ const deleteImage = async (req, res) => {
 const uploadImages = async (req, res) => {
   try {
     const files = req.files;
-    const uploadedImages = await uploadImagesController(files);
+    const { id } = req.params;
+    const uploadedImages = await uploadImagesController(id, files);
     res.status(201).json(uploadedImages);
   } catch (error) {
     res.status(500).json({ error: error.message });

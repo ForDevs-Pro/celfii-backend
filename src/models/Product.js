@@ -37,8 +37,17 @@ module.exports = (sequelize) => {
         allowNull: true,
       },
       imei: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.STRING,
         allowNull: true,
+        validate: {
+          len: {
+            args: [15, 15],
+            msg: "IMEI must be exactly 15 characters long.",
+          },
+          isNumeric: {
+            msg: "IMEI must contain only numbers.",
+          },
+        },
       },
     },
     { timestamps: true, paranoid: true }

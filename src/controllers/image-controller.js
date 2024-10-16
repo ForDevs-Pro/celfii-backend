@@ -1,10 +1,15 @@
-const { Image } = require("../db");
+const { Image, Product } = require("../db");
 const { uploadToCloudinary } = require("../utils/image-util");
 
 const createImageController = async (imageData) => {
   try {
-    const [newImage, created] = await Image.findOrCreate({ where: imageData });
-    if (!created) throw new Error("Image already exists");
+    const newImage = await Image.create({
+      url: imageData.secure_url || imageData.url,
+      cloudinaryId: imageData.public_id,
+      width: imageData.width,
+      height: imageData.height,
+      format: imageData.format,
+    });
     return newImage;
   } catch (error) {
     console.error("Error creating image:", error);
@@ -38,11 +43,16 @@ const deleteImageController = async (id) => {
   }
 };
 
-const uploadImagesController = async (files) => {
+const uploadImagesController = async (id, files) => {
   try {
+    const product = await Product.findByPk(id);
+    if (!product)  throw new Error(`Product with ID ${id} not found.`);
     const uploadPromises = files.map((file) => uploadToCloudinary(file.buffer));
     const uploadedImages = await Promise.all(uploadPromises);
-    return uploadedImages;
+    const createPromises = uploadedImages.map((image) => createImageController(image));
+    const imageInstances = await Promise.all(createPromises);
+    await product.addImages(imageInstances);
+    return imageInstances;
   } catch (error) {
     console.error("Error uploading images:", error);
     throw new Error(`Error uploading images: ${error}`);
