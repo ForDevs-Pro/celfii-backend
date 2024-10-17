@@ -11,7 +11,10 @@ const getAllProductsController = async (queries) => {
   try {
     const productData = getProductData(queries);
     const products = await Product.findAndCountAll(productData);
-    return products.rows.map((product) => product.dataValues);
+    return {
+      rows: products.rows.map((product) => product.dataValues),
+      count: products.count,
+    };
   } catch (error) {
     console.error('Error fetching products:', error);
     throw new Error(`Error fetching products: ${error.message}`);
@@ -44,8 +47,8 @@ const createProductController = async (productData) => {
       },
     });
 
-    if (!created) throw new Error("This product already exists in the database!");
-    
+    if (!created) throw new Error('This product already exists in the database!');
+
     await addProductAssociations(productData);
 
     return await Product.findByPk(product.id, { include: getProductIncludes() });
