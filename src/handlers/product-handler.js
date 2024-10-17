@@ -10,8 +10,9 @@ const {
 const getAllProducts = async (req, res) => {
   try {
     const queries = req.query;
+
     const { rows, count } = await getAllProductsController(queries);
-    res.set('X-Total-Count', count); 
+    res.set('X-Total-Count', count);
     res.status(200).json(rows);
 
   } catch (error) {

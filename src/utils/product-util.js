@@ -16,11 +16,11 @@ const getProductIncludes = () => [
   { model: Category, as: "category" },
 ];
 
-const getProductData = ({ name, sort, page = 1, pageSize = 10, onlyDeleted = false, minPrice, maxPrice }) => {
+const getProductData = ({ name, sort, page = 1, perPage = 10, onlyDeleted = false, minPrice, maxPrice }) => {
   const paranoid = !onlyDeleted;
   const order = orderOptions[sort] || [];
   const include = getProductIncludes();
-  const limit = Math.max(parseInt(pageSize, 10), 1);
+  const limit = Math.max(parseInt(perPage, 10), 1);
   const offset = Math.max((parseInt(page, 10) - 1) * limit, 0);
   const where = {
     ...(onlyDeleted ? { deletedAt: { [Op.ne]: null } } : {}),
