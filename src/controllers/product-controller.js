@@ -41,15 +41,14 @@ const createProductController = async (productData) => {
         stock: productData.stock,
         code: productData.code,
         imei: productData.imei,
-        deletedAt: productData.isDeleted ? new Date() : null,
-        categoryId: productData.categoryId,
       },
     });
 
-    if (!created) throw new Error('This product already exists in the database!');
-    await addProductAssociations(productData, product);
+    if (!created) throw new Error("This product already exists in the database!");
+    
+    await addProductAssociations(productData);
 
-    return await Product.findByPk(productData.id, { include: getProductIncludes() });
+    return await Product.findByPk(product.id, { include: getProductIncludes() });
   } catch (error) {
     console.error('Error creating a product', error);
     throw new Error(`Error creating a product: ${error.message}`);

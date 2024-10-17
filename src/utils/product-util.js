@@ -1,5 +1,6 @@
 const { createView } = require("../controllers/view-controller");
-const { Product, View } = require("../db");
+const { createCategoryController } = require("../controllers/category-controller");
+const { Product, View, Image, Category } = require("../db");
 const { Op } = require("sequelize");
 
 const orderOptions = {
@@ -11,8 +12,8 @@ const orderOptions = {
 
 const getProductIncludes = () => [
   { model: View, as: "view" },
-  // { model: Image, as: "images" },
-  // { model: Caetgory, as: "category" },
+  { model: Image, as: "images" },
+  { model: Category, as: "category" },
 ];
 
 const getProductData = ({ name, sort, page = 1, pageSize = 10, onlyDeleted = false, minPrice, maxPrice }) => {
@@ -31,18 +32,14 @@ const getProductData = ({ name, sort, page = 1, pageSize = 10, onlyDeleted = fal
   return { limit, offset, order, where, include, paranoid };
 };
 
-const addProductAssociations = async (productData, product) => {
+const addProductAssociations = async ({ id, category }) => {
   try {
-    await createView(product.id);
+    await createView(id);
+    const product = await Product.findByPk(id);
 
-    if (productData.images) {
-      const imageInstances = await createImages(productData.images);
-      await product.addImages(imageInstances);
-    }
-
-    if (productData.category) {
-      const categoryInstances = await createCategory(productData.category);
-      await product.addCategory(categoryInstances);
+    if (category) {
+      const categoryInstances = await createCategoryController(category);
+      await product.setCategory(categoryInstances);
     }
   } catch (error) {
     console.error("Error adding associations:", error.message);

@@ -28,12 +28,9 @@ const getCategoriesByIdController = async (id) => {
 
 const createCategoryController = async (name) => {
   try {
-    const [category, created] = await Category.findOrCreate({
+    const [category] = await Category.findOrCreate({
       where: { name },
     });
-    if (!created) {
-      throw new Error("Category already exists");
-    }
     return category;
   } catch (error) {
     console.error("Error creating category:", error);
