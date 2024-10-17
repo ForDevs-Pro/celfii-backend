@@ -1,4 +1,5 @@
-const { Router } = require("express");
+const { Router } = require('express');
+const { checkMaster } = require('../middlewares/master-middleware.js');
 const {
   createUser,
   getAllUsers,
@@ -10,11 +11,11 @@ const {
 
 const userRouter = Router();
 
-userRouter.post('/', createUser);
-userRouter.get('/', getAllUsers);
-userRouter.get('/:id', getUserById);
-userRouter.put('/:id', updateUser);
-userRouter.delete('/:id', deleteUser);
-userRouter.post('/:id/restore', restoreUser);
+userRouter.post('/', checkMaster, createUser);
+userRouter.get('/', checkMaster, getAllUsers);
+userRouter.get('/:id', checkMaster, getUserById);
+userRouter.put('/:id', checkMaster, updateUser);
+userRouter.delete('/:id', checkMaster, deleteUser);
+userRouter.post('/:id/restore', checkMaster, restoreUser);
 
 module.exports = userRouter;

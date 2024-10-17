@@ -3,7 +3,7 @@ const { createRoleController } = require('./controllers/roleController');
 const { getSheetDataService } = require('./services/api-service');
 const { createCategoryController } = require('./controllers/category-controller');
 const { createUserController } = require('./controllers/userController');
-const { Category, Role } = require('./db');
+const { Category, Role, Product, View } = require('./db');
 
 const normalizeNumber = (value) => {
   if (typeof value === 'string') {
@@ -18,22 +18,22 @@ const createRoles = async (roles) => {
   for (const roleName of roles) {
     try {
       await createRoleController(roleName);
-      console.log(`Rol ${roleName} creado correctamente.`);
     } catch (error) {
       console.error(`Error al crear el rol ${roleName}: ${error.message}`);
     }
   }
+  console.log(`Roles Admin y Master creado correctamente.`);
 };
 
 const createCategories = async (categories) => {
   for (const categoryName of categories) {
     try {
       await createCategoryController(categoryName);
-      console.log(`Categoría ${categoryName} creada correctamente.`);
     } catch (error) {
       console.error(`Error al crear la categoría ${categoryName}: ${error.message}`);
     }
   }
+  console.log(`Categorías creadas correctamente.`);
 };
 
 const findOrCreateCategory = async (categoryName) => {
@@ -69,6 +69,25 @@ const createProducts = async (sheetData) => {
     } catch (error) {
       console.error(`Error al crear el producto ${productData.name}:`, error.message);
     }
+  }
+};
+
+const updateViewCounters = async () => {
+  try {
+    const products = await Product.findAll();
+
+    for (const product of products) {
+      const view = await View.findOne({ where: { productId: product.id } });
+
+      if (view) {
+        const randomViews = Math.floor(Math.random() * 1000);
+        view.counter = randomViews;
+        await view.save();
+      }
+    }
+    console.log('Seeder de actualización de vistas ejecutado con éxito');
+  } catch (error) {
+    console.error('Error al ejecutar el seeder de actualización de vistas:', error.message);
   }
 };
 
@@ -120,6 +139,7 @@ const createSeeders = async () => {
 
     await createCategories(categories);
     await createProducts(sheetData);
+    await updateViewCounters();
 
     console.log('Seeders cargados exitosamente');
   } catch (error) {
