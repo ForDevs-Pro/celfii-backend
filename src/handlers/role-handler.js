@@ -1,4 +1,4 @@
-const { createRoleController, deleteRoleController } = require('../controllers/roleController');
+const { createRoleController, deleteRoleController } = require('../controllers/role-controller.js');
 
 const createRole = async (req, res) => {
   try {

@@ -1,8 +1,8 @@
 const { createProductController } = require('./controllers/product-controller');
-const { createRoleController } = require('./controllers/roleController');
+const { createRoleController } = require('./controllers/role-controller.js');
 const { getSheetDataService } = require('./services/api-service');
 const { createCategoryController } = require('./controllers/category-controller');
-const { createUserController } = require('./controllers/userController');
+const { createUserController } = require('./controllers/user-controller.js');
 const { Category, Role } = require('./db');
 
 const normalizeNumber = (value) => {

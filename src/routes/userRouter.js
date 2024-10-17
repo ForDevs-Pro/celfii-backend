@@ -6,7 +6,7 @@ const {
   updateUser,
   deleteUser,
   restoreUser,
-} = require('../handlers/userHandler.js');
+} = require('../handlers/user-handler');
 
 const userRouter = Router();
 

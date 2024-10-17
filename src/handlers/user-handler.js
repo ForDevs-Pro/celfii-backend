@@ -5,7 +5,7 @@ const {
   updateUserController,
   deleteUserController,
   restoreUserController,
-} = require('../controllers/userController');
+} = require('../controllers/user-controller');
 
 const createUser = async (req, res) => {
   try {
