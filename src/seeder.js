@@ -59,7 +59,7 @@ const createProducts = async (sheetData) => {
       priceUsd: normalizeNumber(product.priceUsd) || 1,
       stock: parseInt(product.stock, 10) || 0,
       code: product.code || `CODE-${Math.floor(Math.random() * 10000)}`,
-      imei: product.imei || null,
+      imei: product.imei ? product.imei.replace(/\s/g, "") : null,
       isDeleted: product.isDeleted === 'TRUE',
       categoryId: category.id,
     };
