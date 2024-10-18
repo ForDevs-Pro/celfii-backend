@@ -29,7 +29,19 @@ const deleteRoleController = async (name) => {
   }
 };
 
+const getAllRolesController = async (name) => {
+  try {
+    const where = name ? { name: { [Op.iLike]: `%${name}%` } } : {};
+    const roles = await Role.findAll({ where });
+    return roles;
+  } catch (error) {
+    console.error('Error fetching roles: ' + error.message);
+    throw new Error('Error fetching roles: ' + error.message);
+  }
+};
+
 module.exports = {
   createRoleController,
   deleteRoleController,
+  getAllRolesController,
 };

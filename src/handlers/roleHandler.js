@@ -1,4 +1,5 @@
-const { createRoleController, deleteRoleController } = require('../controllers/roleController');
+const { createRoleController, deleteRoleController, getAllRolesController } = require('../controllers/roleController');
+const { Role } = require('../db');
 
 const createRole = async (req, res) => {
   try {
@@ -26,7 +27,23 @@ const deleteRole = async (req, res) => {
   }
 };
 
+const getAllRoles = async (req, res) => {
+  try {
+    const { name } = req.query;
+    const roles = await getAllRolesController(name);
+    const totalCount = await Role.count({
+      where: name ? { name: { [Op.iLike]: `%${name}%` } } : {},
+    });
+
+    res.set('X-Total-Count', totalCount);
+    res.status(200).json(roles);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 module.exports = {
   createRole,
   deleteRole,
+  getAllRoles,
 };
