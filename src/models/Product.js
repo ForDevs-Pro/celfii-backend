@@ -1,8 +1,8 @@
-const { DataTypes } = require("sequelize");
+const { DataTypes } = require('sequelize');
 
 module.exports = (sequelize) => {
   sequelize.define(
-    "Product",
+    'Product',
     {
       id: {
         type: DataTypes.STRING,
@@ -17,7 +17,7 @@ module.exports = (sequelize) => {
       description: {
         type: DataTypes.TEXT,
         allowNull: false,
-        defaultValue: "Sin descripción disponible",
+        defaultValue: 'Sin descripción disponible',
       },
       priceArs: {
         type: DataTypes.DECIMAL(10, 2),
@@ -39,15 +39,15 @@ module.exports = (sequelize) => {
       imei: {
         type: DataTypes.STRING,
         allowNull: true,
-        // validate: {
-        //   len: {
-        //     args: [15, 15],
-        //     msg: "IMEI must be exactly 15 characters long.",
-        //   },
-        //   isNumeric: {
-        //     msg: "IMEI must contain only numbers.",
-        //   },
-        // },
+        validate: {
+          len: {
+            args: [15, 15],
+            msg: 'IMEI must be exactly 15 characters long.',
+          },
+          isNumeric: {
+            msg: 'IMEI must contain only numbers.',
+          },
+        },
       },
     },
     { timestamps: true, paranoid: true }

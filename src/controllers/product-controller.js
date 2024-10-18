@@ -3,6 +3,7 @@ const { addView } = require('./view-controller');
 const {
   getProductData,
   getProductIncludes,
+  formatImeiWithSpaces,
   setProductAssociations,
   addProductAssociations,
 } = require('../utils/product-util');
@@ -12,7 +13,11 @@ const getAllProductsController = async (queries) => {
     const productData = getProductData(queries);
     const products = await Product.findAndCountAll(productData);
     return {
-      rows: products.rows.map((product) => product.dataValues),
+      rows: products.rows.map((product) => {
+        const data = product.dataValues;
+        if (data.imei) data.imei = formatImeiWithSpaces(data.imei);
+        return data;
+      }),
       count: products.count,
     };
   } catch (error) {
@@ -25,6 +30,7 @@ const getProductByIdController = async (id) => {
   try {
     const product = await Product.findByPk(id, { include: getProductIncludes() });
     await addView(product.id);
+    if (product.imei) product.imei = formatImeiWithSpaces(product.imei);
     return product;
   } catch (error) {
     console.error(`Error fetching product with id ${id}`, error);
