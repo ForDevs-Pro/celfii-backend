@@ -1,14 +1,14 @@
 const { Image, Product } = require("../db");
-const { uploadToCloudinary } = require("../utils/image-util");
+const { uploadToCloudinary, deleteFromCloudinary } = require("../utils/image-util");
 
 const createImageController = async (imageData) => {
   try {
     const newImage = await Image.create({
       url: imageData.secure_url || imageData.url,
-      cloudinaryId: imageData.public_id,
       width: imageData.width,
       height: imageData.height,
       format: imageData.format,
+      publicId: imageData.public_id,
     });
     return newImage;
   } catch (error) {
@@ -35,6 +35,7 @@ const deleteImageController = async (id) => {
   try {
     const imageToDelete = await Image.findByPk(id);
     if (!imageToDelete) throw new Error("Image not found");
+    await deleteFromCloudinary(imageToDelete.publicId);
     await imageToDelete.destroy();
     return "Image deleted successfully";
   } catch (error) {
@@ -46,7 +47,7 @@ const deleteImageController = async (id) => {
 const uploadImagesController = async (id, files) => {
   try {
     const product = await Product.findByPk(id);
-    if (!product)  throw new Error(`Product with ID ${id} not found.`);
+    if (!product) throw new Error(`Product with ID ${id} not found.`);
     const uploadPromises = files.map((file) => uploadToCloudinary(file.buffer));
     const uploadedImages = await Promise.all(uploadPromises);
     const createPromises = uploadedImages.map((image) => createImageController(image));

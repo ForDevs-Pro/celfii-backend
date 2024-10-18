@@ -18,7 +18,7 @@ module.exports = (sequelize) => {
         type: DataTypes.STRING,
         allowNull: true,
       },
-      cloudinaryId: {
+      publicId: {
         type: DataTypes.STRING,
         allowNull: false,
       },
@@ -35,9 +35,6 @@ module.exports = (sequelize) => {
         allowNull: true,
       },
     },
-    {
-      timestamps: true,
-      paranoid: true,
-    }
+    { timestamps: true }
   );
 };
