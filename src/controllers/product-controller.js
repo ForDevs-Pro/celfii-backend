@@ -37,17 +37,22 @@ const getProductByIdController = async (id) => {
 
 const createProductController = async (productData) => {
   try {
+    const defaults = {
+      name: productData.name,
+      description: productData.description,
+      priceArs: productData.priceArs,
+      priceUsd: productData.priceUsd,
+      stock: productData.stock,
+      code: productData.code,
+      imei: productData.imei,
+      deletedAt: productData.isDeleted ? new Date() : null,
+    };
+
+    if (productData.categoryId) defaults.categoryId = productData.categoryId;
+
     const [product, created] = await Product.findOrCreate({
       where: { id: productData.id },
-      defaults: {
-        name: productData.name,
-        description: productData.description,
-        priceArs: productData.priceArs,
-        priceUsd: productData.priceUsd,
-        stock: productData.stock,
-        code: productData.code,
-        imei: productData.imei,
-      },
+      defaults,
     });
 
     if (!created) throw new Error("This product already exists in the database!");
