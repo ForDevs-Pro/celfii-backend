@@ -13,13 +13,17 @@ const orderOptions = {
 const getProductIncludes = () => [
   { model: View, as: "view" },
   { model: Image, as: "images" },
-  { model: Category, as: "category" },
+  { model: Category, as: "category"},
 ];
 
-const getProductData = ({ name, sort, page = 1, perPage = 10, onlyDeleted = false, minPrice, maxPrice }) => {
+const getProductData = ({ name, sort, page = 1, perPage = 10, onlyDeleted = false, minPrice, maxPrice, category }) => {
   const paranoid = !onlyDeleted;
   const order = orderOptions[sort] || [];
-  const include = getProductIncludes();
+  const include = [
+    { model: View, as: "view" },
+    { model: Image, as: "images" },
+    { model: Category, as: "category", required: !!category },
+  ];
   const limit = Math.max(parseInt(perPage, 10), 1);
   const offset = Math.max((parseInt(page, 10) - 1) * limit, 0);
   const where = {
@@ -27,6 +31,7 @@ const getProductData = ({ name, sort, page = 1, perPage = 10, onlyDeleted = fals
     ...(name && { [Op.or]: [{ name: { [Op.iLike]: `%${name}%` } }] }),
     ...(minPrice && { priceArs: { [Op.gte]: parseFloat(minPrice) } }),
     ...(maxPrice && { priceArs: { [Op.lte]: parseFloat(maxPrice) } }),
+     ...(category && { '$category.name$': { [Op.iLike]: `%${category}%` } }),
   };
 
   return { limit, offset, order, where, include, paranoid };
