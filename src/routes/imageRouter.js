@@ -1,18 +1,14 @@
 const { Router } = require("express");
 const {
-  createImage,
-  updateImage,
-  deleteImage,
   uploadImages,
+  deleteImages,
 } = require("../handlers/image-handler");
 
 const upload = require("../middlewares/uploadMiddleware");
 
 const imageRouter = Router();
 
-imageRouter.post("/", createImage);
-imageRouter.patch("/:id", updateImage);
-imageRouter.delete("/:id", deleteImage);
 imageRouter.post("/upload/:id", upload.array("images", 10), uploadImages);
+imageRouter.delete("/", deleteImages);
 
 module.exports = imageRouter;

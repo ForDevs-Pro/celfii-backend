@@ -1,6 +1,6 @@
 const { cloudinary, uploadFolder } = require("../config/cloudinary-config");
 
-const uploadToCloudinary = (buffer) => {
+const uploadImageToCloudinary = (buffer) => {
   return new Promise((resolve, reject) => {
     const uploadStream = cloudinary.uploader.upload_stream(
       { resource_type: "image", folder: uploadFolder },
@@ -16,10 +16,9 @@ const uploadToCloudinary = (buffer) => {
   });
 };
 
-const deleteFromCloudinary = async (publicId) => {
+const deleteImageFromCloudinary = async (publicId) => {
   try {
     const result = await cloudinary.uploader.destroy(publicId);
-    console.log("File deleted from Cloudinary:", result);
     return result;
   } catch (error) {
     console.error("Error deleting file from Cloudinary:", error);
@@ -27,4 +26,20 @@ const deleteFromCloudinary = async (publicId) => {
   }
 };
 
-module.exports = { uploadToCloudinary, deleteFromCloudinary };
+const createImageInDataBase = async (imageData) => {
+  try {
+    const newImage = await Image.create({
+      url: imageData.secure_url || imageData.url,
+      width: imageData.width,
+      height: imageData.height,
+      format: imageData.format,
+      publicId: imageData.public_id,
+    });
+    return newImage;
+  } catch (error) {
+    console.error("Error creating image in DataBase:", error);
+    throw new Error(`Error creating image in DataBase: ${error}`);
+  }
+};
+
+module.exports = { createImageInDataBase, uploadImageToCloudinary, deleteImageFromCloudinary };
