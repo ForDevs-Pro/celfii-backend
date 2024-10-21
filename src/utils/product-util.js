@@ -4,19 +4,28 @@ const { Product, View, Image, Category } = require("../db");
 const { Op } = require("sequelize");
 
 const orderOptions = {
-  "most popular": [["view", "DESC"]],
+  "most popular": [["view", "counter", "DESC"]],
   "highest price": [["priceArs", "DESC"]],
   "lowest price": [["priceArs", "ASC"]],
-  "newest": [["createdAt", "DESC"]],
+  newest: [["createdAt", "DESC"]],
 };
 
 const getProductIncludes = () => [
   { model: View, as: "view" },
   { model: Image, as: "images" },
-  { model: Category, as: "category"},
+  { model: Category, as: "category" },
 ];
 
-const getProductData = ({ name, sort, page = 1, perPage = 10, onlyDeleted = false, minPrice, maxPrice, category }) => {
+const getProductData = ({
+  name,
+  sort,
+  page = 1,
+  perPage = 10,
+  onlyDeleted = false,
+  minPrice,
+  maxPrice,
+  category,
+}) => {
   const paranoid = !onlyDeleted;
   const order = orderOptions[sort] || [];
   const include = [
@@ -31,7 +40,7 @@ const getProductData = ({ name, sort, page = 1, perPage = 10, onlyDeleted = fals
     ...(name && { [Op.or]: [{ name: { [Op.iLike]: `%${name}%` } }] }),
     ...(minPrice && { priceArs: { [Op.gte]: parseFloat(minPrice) } }),
     ...(maxPrice && { priceArs: { [Op.lte]: parseFloat(maxPrice) } }),
-     ...(category && { '$category.name$': { [Op.iLike]: `%${category}%` } }),
+    ...(category && { "$category.name$": { [Op.iLike]: `%${category}%` } }),
   };
 
   return { limit, offset, order, where, include, paranoid };
@@ -65,11 +74,10 @@ const addProductAssociations = async ({ id, category }) => {
 const setProductAssociations = async (productData) => {
   try {
     console.log(productData.id);
-    
+
     const product = await Product.findByPk(productData.id);
-    
+
     if (productData.category) {
-      
       const categoryInstances = await createCategoryController(productData.category);
       await product.setCategory(categoryInstances);
     }
