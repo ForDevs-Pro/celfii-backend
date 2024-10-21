@@ -12,8 +12,11 @@ const getAllProducts = async (req, res) => {
     const queries = req.query;
 
     const { rows, count } = await getAllProductsController(queries);
-    res.set('X-Total-Count', count);
-    res.status(200).json(rows);
+    // res.set('X-Total-Count', count);
+    res.status(200).json({
+      products: rows,
+      totalItems: count,
+    });
 
   } catch (error) {
     res.status(500).json({ error: error.message });
