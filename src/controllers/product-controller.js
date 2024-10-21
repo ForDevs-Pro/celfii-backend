@@ -71,7 +71,7 @@ const createProductController = async (productData) => {
 
 const updateProductByIdController = async (productData, id) => {
   try {
-    await setProductAssociations(productData);
+    await setProductAssociations({id , ...productData});
     const [affectedRows, updatedProduct] = await Product.update(
       {
         id: productData.id,
@@ -88,7 +88,6 @@ const updateProductByIdController = async (productData, id) => {
         include: getProductIncludes(),
       }
     );
-    console.log(affectedRows, updatedProduct);
 
     if (!affectedRows) throw new Error('Product not found');
 
