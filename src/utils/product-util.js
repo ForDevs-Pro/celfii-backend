@@ -64,14 +64,13 @@ const addProductAssociations = async ({ id, category }) => {
 
 const setProductAssociations = async (productData) => {
   try {
+    console.log(productData.id);
+    
     const product = await Product.findByPk(productData.id);
-
-    if (productData.images) {
-      const imageInstances = await createImages(productData.images);
-      await product.setImages(imageInstances);
-    }
+    
     if (productData.category) {
-      const categoryInstances = await createCategory(productData.category);
+      
+      const categoryInstances = await createCategoryController(productData.category);
       await product.setCategory(categoryInstances);
     }
   } catch (error) {

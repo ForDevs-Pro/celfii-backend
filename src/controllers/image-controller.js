@@ -1,5 +1,5 @@
 const { Image, Product } = require("../db");
-const { uploadImageToCloudinary, deleteImageFromCloudinary } = require("../utils/image-util");
+const { uploadImageToCloudinary, deleteImageFromCloudinary, createImageInDataBase } = require("../utils/image-util");
 
 const uploadImagesController = async (id, files) => {
   try {
@@ -7,7 +7,7 @@ const uploadImagesController = async (id, files) => {
     if (!product) throw new Error(`Product with ID ${id} not found.`);
     const uploadPromises = files.map((file) => uploadImageToCloudinary(file.buffer));
     const uploadedImages = await Promise.all(uploadPromises);
-    const createPromises = uploadedImages.map((image) => createImageController(image));
+    const createPromises = uploadedImages.map((image) => createImageInDataBase(image));
     const imageInstances = await Promise.all(createPromises);
     await product.addImages(imageInstances);
     return imageInstances;
