@@ -1,9 +1,13 @@
 const { Image, Product } = require("../db");
+<<<<<<< Updated upstream
 const {
   uploadImageToCloudinary,
   deleteImageFromCloudinary,
   createImageInDataBase,
 } = require("../utils/image-util");
+=======
+const { uploadImageToCloudinary, deleteImageFromCloudinary, createImageInDataBase } = require("../utils/image-util");
+>>>>>>> Stashed changes
 
 const uploadImagesController = async (id, files) => {
   try {
