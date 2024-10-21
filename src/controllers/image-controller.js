@@ -17,7 +17,7 @@ const uploadImagesController = async (id, files) => {
   }
 };
 
-const deleteImageController = async (images) => {
+const deleteImagesController = async (images) => {
   try {
     await Promise.all(
       images.map(async (image) => {
@@ -34,5 +34,5 @@ const deleteImageController = async (images) => {
 
 module.exports = {
   uploadImagesController,
-  deleteImageController,
+  deleteImagesController,
 };
