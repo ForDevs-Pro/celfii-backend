@@ -80,14 +80,13 @@ const addProductAssociations = async ({ id, category, images }) => {
 
 const setProductAssociations = async ({ id, category, images, imagesToDelete }) => {
   try {
-    console.log(imagesToDelete, typeof imagesToDelete);
-    
     if (imagesToDelete) await deleteImages(imagesToDelete);
+    
     const product = await Product.findByPk(id);
 
     if (images && typeof images === "object") {
       const imagesInstances = await uploadImages(id, images);
-      await product.setImages(imagesInstances);
+      await product.addImages(imagesInstances);
     }
 
     if (category) {

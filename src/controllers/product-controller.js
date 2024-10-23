@@ -91,7 +91,7 @@ const updateProductByIdController = async (productData, id) => {
     );
 
     if (!affectedRows) throw new Error("Product not found");
-
+    
     return updatedProduct[0];
   } catch (error) {
     console.error("Error updating a product", error);
