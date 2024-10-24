@@ -82,7 +82,7 @@ const setProductAssociations = async ({ id, category, images, imagesToDelete }) 
   try {
     if (imagesToDelete) await deleteImages(imagesToDelete);
     
-    const product = await Product.findByPk(id);
+    const product = await Product.findByPk(id , { paranoid: false });
 
     if (images && typeof images === "object") {
       const imagesInstances = await uploadImages(id, images);
