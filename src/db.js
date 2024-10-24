@@ -46,4 +46,5 @@ Image.belongsTo(Product, { foreignKey: 'productId', as: 'product' });
 module.exports = {
   ...sequelize.models,
   conn: sequelize,
+  sequelize,
 };
