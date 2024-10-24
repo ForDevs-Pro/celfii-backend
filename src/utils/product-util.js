@@ -1,5 +1,7 @@
 const { createView } = require("../controllers/view-controller");
 const { createCategoryController } = require("../controllers/category-controller");
+const { uploadImages, deleteImages } = require("../controllers/image-controller");
+
 const { Product, View, Image, Category } = require("../db");
 const { Op } = require("sequelize");
 
@@ -56,13 +58,18 @@ const formatImeiWithSpaces = (imei) => {
   return imei;
 };
 
-const addProductAssociations = async ({ id, category }) => {
+const addProductAssociations = async ({ id, category, images }) => {
   try {
     await createView(id);
     const product = await Product.findByPk(id);
 
+    if (images) {
+      const imagesInstances = await uploadImages(id, images);
+      await product.addImages(imagesInstances);
+    }
+
     if (category) {
-      const categoryInstances = await createCategoryController(category);
+      const categoryInstances = await createCategoryController(category.name);
       await product.setCategory(categoryInstances);
     }
   } catch (error) {
@@ -71,14 +78,19 @@ const addProductAssociations = async ({ id, category }) => {
   }
 };
 
-const setProductAssociations = async (productData) => {
+const setProductAssociations = async ({ id, category, images, imagesToDelete }) => {
   try {
-    console.log(productData.id);
+    if (imagesToDelete) await deleteImages(imagesToDelete);
+    
+    const product = await Product.findByPk(id);
 
-    const product = await Product.findByPk(productData.id);
+    if (images && typeof images === "object") {
+      const imagesInstances = await uploadImages(id, images);
+      await product.addImages(imagesInstances);
+    }
 
-    if (productData.category) {
-      const categoryInstances = await createCategoryController(productData.category);
+    if (category) {
+      const categoryInstances = await createCategoryController(category);
       await product.setCategory(categoryInstances);
     }
   } catch (error) {

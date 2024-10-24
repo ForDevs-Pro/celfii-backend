@@ -10,14 +10,12 @@ const {
 const getAllProducts = async (req, res) => {
   try {
     const queries = req.query;
-
     const { rows, count } = await getAllProductsController(queries);
-    res.set('X-Total-Count', count);
+    res.set("X-Total-Count", count);
     res.status(200).json({
       products: rows,
       totalItems: count,
     });
-
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -35,8 +33,9 @@ const getProductById = async (req, res) => {
 
 const createProduct = async (req, res) => {
   try {
+    const files = req.files;
     const productData = req.body;
-    const response = await createProductController(productData);
+    const response = await createProductController({ images: files, ...productData });
     res.status(201).json(response);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -45,9 +44,11 @@ const createProduct = async (req, res) => {
 
 const updateProductById = async (req, res) => {
   try {
+    const files = req.files;
     const { id } = req.params;
     const productData = req.body;
-    const response = await updateProductByIdController(productData, id);
+
+    const response = await updateProductByIdController({ images: files, ...productData }, id);
     res.status(200).json(response);
   } catch (error) {
     res.status(500).json({ error: error.message });

@@ -8,11 +8,13 @@ const {
   restoreProductById,
 } = require("../handlers/product-handler");
 
+const upload = require("../middlewares/uploadMiddleware");
+
 const productRouter = Router();
-productRouter.post("/", createProduct);
+productRouter.post("/", upload.array("images", 10), createProduct);
 productRouter.get("/", getAllProducts);
 productRouter.get("/:id", getProductById);
-productRouter.put("/:id", updateProductById);
+productRouter.put("/:id", upload.array("images", 10), updateProductById);
 productRouter.delete("/:id", deleteProductById);
 productRouter.post("/:id", restoreProductById);
 

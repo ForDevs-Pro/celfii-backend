@@ -1,15 +1,20 @@
 const { Image, Product } = require("../db");
-const { uploadImageToCloudinary, deleteImageFromCloudinary, createImageInDataBase } = require("../utils/image-util");
+const {
+  uploadImageToCloudinary,
+  deleteImageFromCloudinary,
+  createImageInDataBase,
+} = require("../utils/image-util");
 
-const uploadImagesController = async (id, files) => {
+const uploadImages = async (id, files) => {
   try {
     const product = await Product.findByPk(id);
     if (!product) throw new Error(`Product with ID ${id} not found.`);
-    const uploadPromises = files.map((file) => uploadImageToCloudinary(file.buffer));
+    const validFiles = files.filter((file) => file && file.buffer);
+    if (validFiles.length === 0) return;
+    const uploadPromises = validFiles.map((file) => uploadImageToCloudinary(file.buffer));
     const uploadedImages = await Promise.all(uploadPromises);
     const createPromises = uploadedImages.map((image) => createImageInDataBase(image));
     const imageInstances = await Promise.all(createPromises);
-    await product.addImages(imageInstances);
     return imageInstances;
   } catch (error) {
     console.error("Error uploading images:", error);
@@ -17,14 +22,17 @@ const uploadImagesController = async (id, files) => {
   }
 };
 
-const deleteImagesController = async (images) => {
+const deleteImages = async (imagesToDelete) => {
   try {
-    await Promise.all(
-      images.map(async (image) => {
-        await deleteImageFromCloudinary(image.publicId);
-        await Image.destroy({ where: { id: image.id } });
-      })
-    );
+    if (imagesToDelete.length)
+      await Promise.all(
+        imagesToDelete
+          .map((image) => JSON.parse(image))
+          .map(async (image) => {
+            await deleteImageFromCloudinary(image.publicId);
+            await Image.destroy({ where: { id: image.id } });
+          })
+      );
     return "Images deleted successfully";
   } catch (error) {
     console.error("Error deleting image:", error);
@@ -33,6 +41,6 @@ const deleteImagesController = async (images) => {
 };
 
 module.exports = {
-  uploadImagesController,
-  deleteImagesController,
+  uploadImages,
+  deleteImages,
 };
