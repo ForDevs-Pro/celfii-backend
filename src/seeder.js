@@ -51,6 +51,17 @@ const createProducts = async (sheetData) => {
     const categoryName = product.imei ? "Equipos" : product.category || "Otros";
     const category = await findOrCreateCategory(categoryName);
 
+    const images =
+      product.images && product.images.includes("https")
+        ? [product.images]
+        : product.images
+        ? [
+            `https://www.appsheet.com/template/gettablefileurl?appName=NewApp-645565216&appId=79fbe012-f78c-4246-833e-28e13ab4b6f4&tableName=Articulos&fileName=${encodeURIComponent(
+              product.images
+            )}`,
+          ]
+          : [];
+
     const productData = {
       id: product.id,
       name: product.name || "Producto por defecto",
@@ -62,15 +73,23 @@ const createProducts = async (sheetData) => {
       imei: product.imei ? product.imei.replace(/\s/g, "") : null,
       isDeleted: product.isDeleted === "TRUE",
       categoryId: category.id,
+      images,
     };
 
     try {
-      await createProductController(productData);
+      await fetch("http://localhost:3001/products", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(productData),
+      });
     } catch (error) {
       console.error(`Error al crear el producto ${productData.name}:`, error.message);
     }
   }
 };
+
 
 const updateViewCounters = async () => {
   try {
