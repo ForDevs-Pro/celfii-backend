@@ -1,11 +1,15 @@
-const { createRoleController, deleteRoleController, getAllRolesController } = require('../controllers/roleController');
-const { Role } = require('../db');
+const {
+  createRoleController,
+  deleteRoleController,
+  getAllRolesController,
+} = require("../controllers/role-controller");
+const { Role } = require("../db");
 
 const createRole = async (req, res) => {
   try {
     const { name } = req.body;
     if (!name) {
-      return res.status(400).json({ message: 'Role name is required' });
+      return res.status(400).json({ message: "Role name is required" });
     }
     const newRole = await createRoleController(name);
     res.status(201).json(newRole);
@@ -18,7 +22,7 @@ const deleteRole = async (req, res) => {
   try {
     const { name } = req.body;
     if (!name) {
-      return res.status(400).json({ message: 'Role name is required' });
+      return res.status(400).json({ message: "Role name is required" });
     }
     const response = await deleteRoleController(name);
     res.status(200).json(response);
@@ -35,7 +39,7 @@ const getAllRoles = async (req, res) => {
       where: name ? { name: { [Op.iLike]: `%${name}%` } } : {},
     });
 
-    res.set('X-Total-Count', totalCount);
+    res.set("X-Total-Count", totalCount);
     res.status(200).json(roles);
   } catch (error) {
     res.status(500).json({ message: error.message });

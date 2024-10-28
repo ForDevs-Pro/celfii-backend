@@ -1,12 +1,12 @@
-const { Product } = require('../db');
-const { addView } = require('./view-controller');
+const { Product } = require("../db");
+const { addView } = require("./view-controller");
 const {
   getProductData,
   getProductIncludes,
   formatImeiWithSpaces,
   setProductAssociations,
   addProductAssociations,
-} = require('../utils/product-util');
+} = require("../utils/product-util");
 
 const getAllProductsController = async (queries) => {
   try {
@@ -22,7 +22,7 @@ const getAllProductsController = async (queries) => {
       count: products.count,
     };
   } catch (error) {
-    console.error('Error fetching products:', error);
+    console.error("Error fetching products:", error);
     throw new Error(`Error fetching products: ${error.message}`);
   }
 };
@@ -59,13 +59,13 @@ const createProductController = async (productData) => {
       defaults,
     });
 
-    if (!created) throw new Error('This product already exists in the database!');
+    if (!created) throw new Error("This product already exists in the database!");
 
     await addProductAssociations(productData);
 
     return await Product.findByPk(product.id, { include: getProductIncludes() });
   } catch (error) {
-    console.error('Error creating a product', error);
+    console.error("Error creating a product", error);
     throw new Error(`Error creating a product: ${error.message}`);
   }
 };
@@ -74,7 +74,7 @@ const updateProductByIdController = async (productData, id) => {
   try {
     const existingProduct = await Product.findOne({
       where: { id },
-      paranoid: false, 
+      paranoid: false,
     });
 
     if (!existingProduct) {
@@ -92,11 +92,11 @@ const updateProductByIdController = async (productData, id) => {
       },
       {
         where: { id },
-        paranoid: false, 
+        paranoid: false,
       }
     );
     if (!affectedRows) {
-      throw new Error('No se pudo actualizar el producto');
+      throw new Error("No se pudo actualizar el producto");
     }
     const updatedProduct = await Product.findOne({
       where: { id },
@@ -106,20 +106,19 @@ const updateProductByIdController = async (productData, id) => {
 
     return updatedProduct;
   } catch (error) {
-    console.error('Error actualizando el producto', error);
+    console.error("Error actualizando el producto", error);
     throw new Error(`Error actualizando el producto: ${error.message}`);
   }
 };
 
-
 const deleteProductByIdController = async (id) => {
   try {
     const product = await Product.findByPk(id);
-    if (!product) throw new Error('Product not found');
+    if (!product) throw new Error("Product not found");
     await Product.destroy({ where: { id } });
-    return { message: 'Product deleted successfully' };
+    return { message: "Product deleted successfully" };
   } catch (error) {
-    console.error('Error deleting products:', error);
+    console.error("Error deleting products:", error);
     throw new Error(`Error deleting product: ${error.message}`);
   }
 };
@@ -130,12 +129,12 @@ const restoreProductByIdController = async (id) => {
       where: { id },
       paranoid: false,
     });
-    if (!product) throw new Error('No deleted product found with the given id');
+    if (!product) throw new Error("No deleted product found with the given id");
     await product.restore();
     return product;
   } catch (error) {
-    console.error('Error restoring product', error);
-    throw new Error('Error restoring product');
+    console.error("Error restoring product", error);
+    throw new Error("Error restoring product");
   }
 };
 

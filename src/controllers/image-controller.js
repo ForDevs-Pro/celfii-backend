@@ -1,9 +1,9 @@
-const { Image, Product } = require('../db');
+const { Image, Product } = require("../db");
 const {
   uploadImageToCloudinary,
   deleteImageFromCloudinary,
   createImageInDataBase,
-} = require('../utils/image-util');
+} = require("../utils/image-util");
 
 const uploadImages = async (id, files) => {
   try {
@@ -17,7 +17,7 @@ const uploadImages = async (id, files) => {
     const imageInstances = await Promise.all(createPromises);
     return imageInstances;
   } catch (error) {
-    console.error('Error uploading images:', error);
+    console.error("Error uploading images:", error);
     throw new Error(`Error uploading images: ${error}`);
   }
 };
@@ -33,9 +33,9 @@ const deleteImages = async (imagesToDelete) => {
             await Image.destroy({ where: { id: image.id } });
           })
       );
-    return 'Images deleted successfully';
+    return "Images deleted successfully";
   } catch (error) {
-    console.error('Error deleting image:', error);
+    console.error("Error deleting image:", error);
     throw new Error(`Error deleting image: ${error}`);
   }
 };

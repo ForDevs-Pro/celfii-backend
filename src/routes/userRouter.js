@@ -1,5 +1,5 @@
-const { Router } = require('express');
-const { checkMaster } = require('../middlewares/master-middleware.js');
+const { Router } = require("express");
+const { checkMaster } = require("../middlewares/master-middleware.js");
 const {
   createUser,
   getAllUsers,
@@ -7,15 +7,15 @@ const {
   updateUser,
   deleteUser,
   restoreUser,
-} = require('../handlers/userHandler.js');
+} = require("../handlers/user-handler.js");
 
 const userRouter = Router();
 
-userRouter.post('/', checkMaster, createUser);
-userRouter.get('/', checkMaster, getAllUsers);
-userRouter.get('/:id', checkMaster, getUserById);
-userRouter.put('/:id', checkMaster, updateUser);
-userRouter.delete('/:id', checkMaster, deleteUser);
-userRouter.post('/:id/restore', checkMaster, restoreUser);
+userRouter.post("/", checkMaster, createUser);
+userRouter.get("/", checkMaster, getAllUsers);
+userRouter.get("/:id", checkMaster, getUserById);
+userRouter.put("/:id", checkMaster, updateUser);
+userRouter.delete("/:id", checkMaster, deleteUser);
+userRouter.post("/:id/restore", checkMaster, restoreUser);
 
 module.exports = userRouter;

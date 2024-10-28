@@ -4,9 +4,9 @@ const {
   getCategoriesByIdController,
   updateCategoryController,
   deleteCategoryController,
-} = require('../controllers/category-controller');
+} = require("../controllers/category-controller");
 
-const { Category } = require('../db');
+const { Category } = require("../db");
 
 const getAllCategories = async (req, res) => {
   try {
@@ -15,7 +15,7 @@ const getAllCategories = async (req, res) => {
     const totalCount = await Category.count({
       where: name ? { name: { [Op.iLike]: `%${name}%` } } : {},
     });
-    res.set('X-Total-Count', totalCount);
+    res.set("X-Total-Count", totalCount);
     res.status(200).json(response);
   } catch (error) {
     return res.status(500).json({ error: error.message });
@@ -36,7 +36,7 @@ const createCategory = async (req, res) => {
   try {
     const { name } = req.body;
     if (!name) {
-      return res.status(400).json({ error: 'Name is required' });
+      return res.status(400).json({ error: "Name is required" });
     }
     const newCategory = await createCategoryController(name);
     res.status(200).json(newCategory);
@@ -52,7 +52,7 @@ const updateCategory = async (req, res) => {
     const { id } = req.params;
 
     if (!name || !id) {
-      return res.status(400).json({ error: 'Name and ID is required' });
+      return res.status(400).json({ error: "Name and ID is required" });
     }
     const response = await updateCategoryController(name, id);
     res.status(200).json(response);
