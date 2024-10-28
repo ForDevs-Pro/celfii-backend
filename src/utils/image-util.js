@@ -30,11 +30,11 @@ const deleteImageFromCloudinary = async (publicId) => {
 const createImageInDataBase = async (imageData) => {
   try {
     const newImage = await Image.create({
-      url: imageData.secure_url || imageData.url,
-      width: imageData.width,
-      height: imageData.height,
-      format: imageData.format,
-      publicId: imageData.public_id,
+      url: imageData.secure_url || imageData.url || imageData,
+      width: imageData.width || 600,
+      height: imageData.height || 600,
+      format: imageData.format || ".jpg",
+      publicId: imageData.public_id || imageData,
     });
     return newImage;
   } catch (error) {

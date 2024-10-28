@@ -10,12 +10,17 @@ const uploadImages = async (id, files) => {
     const product = await Product.findByPk(id, { paranoid: false });
     if (!product) throw new Error(`Product with ID ${id} not found.`);
     const validFiles = files.filter((file) => file && file.buffer);
-    if (validFiles.length === 0) return;
-    const uploadPromises = validFiles.map((file) => uploadImageToCloudinary(file.buffer));
-    const uploadedImages = await Promise.all(uploadPromises);
-    const createPromises = uploadedImages.map((image) => createImageInDataBase(image));
-    const imageInstances = await Promise.all(createPromises);
-    return imageInstances;
+    if (validFiles.length) {
+      const uploadPromises = validFiles.map((file) => uploadImageToCloudinary(file.buffer));
+      const uploadedImages = await Promise.all(uploadPromises);
+      const createPromises = uploadedImages.map((image) => createImageInDataBase(image));
+      const imageInstances = await Promise.all(createPromises);
+      return imageInstances;
+    } else {
+      const createPromises = files.map((image) => createImageInDataBase(image));
+      const imageInstances = await Promise.all(createPromises);
+      return imageInstances;
+    }
   } catch (error) {
     console.error("Error uploading images:", error);
     throw new Error(`Error uploading images: ${error}`);
