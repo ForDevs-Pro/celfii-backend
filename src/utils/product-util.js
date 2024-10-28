@@ -2,11 +2,11 @@ const { createView } = require("../controllers/view-controller");
 const { createCategoryController } = require("../controllers/category-controller");
 const { uploadImages, deleteImages } = require("../controllers/image-controller");
 
-const { Product, View, Image, Category } = require("../db");
+const { Product, View, Image, Category, sequelize } = require("../db");
 const { Op } = require("sequelize");
 
 const orderOptions = {
-  "most popular": [["view", "counter", "DESC"]],
+  "most popular": [[{ model: View, as: "view" }, "counter", "DESC"]],
   "highest price": [["priceArs", "DESC"]],
   "lowest price": [["priceArs", "ASC"]],
   newest: [["createdAt", "DESC"]],
@@ -29,14 +29,9 @@ const getProductData = ({
   category,
 }) => {
   const paranoid = !onlyDeleted;
-  const order = orderOptions[sort] || [];
-  const include = [
-    { model: View, as: "view" },
-    { model: Image, as: "images" },
-    { model: Category, as: "category", required: !!category },
-  ];
   const limit = Math.max(parseInt(perPage, 10), 1);
   const offset = Math.max((parseInt(page, 10) - 1) * limit, 0);
+
   const where = {
     ...(onlyDeleted ? { deletedAt: { [Op.ne]: null } } : {}),
     ...(name && { [Op.or]: [{ name: { [Op.iLike]: `%${name}%` } }] }),
@@ -44,6 +39,19 @@ const getProductData = ({
     ...(maxPrice && { priceArs: { [Op.lte]: parseFloat(maxPrice) } }),
     ...(category && { "$category.name$": { [Op.iLike]: `%${category}%` } }),
   };
+
+  const include = [
+    { model: View, as: "view" },
+    { model: Image, as: "images" },
+    { model: Category, as: "category", required: !!category },
+  ];
+
+  const order =
+    sort === "most popular"
+      ? sequelize.literal(
+          `(SELECT "counter" FROM "Views" WHERE "Views"."productId" = "Product"."id") DESC`
+        )
+      : orderOptions[sort] || [];
 
   return { limit, offset, order, where, include, paranoid };
 };
@@ -81,8 +89,8 @@ const addProductAssociations = async ({ id, category, images }) => {
 const setProductAssociations = async ({ id, category, images, imagesToDelete }) => {
   try {
     if (imagesToDelete) await deleteImages(imagesToDelete);
-    
-    const product = await Product.findByPk(id , { paranoid: false });
+
+    const product = await Product.findByPk(id, { paranoid: false });
 
     if (images && typeof images === "object") {
       const imagesInstances = await uploadImages(id, images);
