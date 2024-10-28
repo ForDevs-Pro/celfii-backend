@@ -77,7 +77,7 @@ const addProductAssociations = async ({ id, category, images }) => {
     }
 
     if (category) {
-      const categoryInstances = await createCategoryController(category.name);
+      const categoryInstances = await createCategoryController(category);
       await product.setCategory(categoryInstances);
     }
   } catch (error) {
