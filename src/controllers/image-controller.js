@@ -5,10 +5,8 @@ const {
   createImageInDataBase,
 } = require("../utils/image-util");
 
-const uploadImages = async (id, files) => {
+const uploadImages = async (files) => {
   try {
-    const product = await Product.findByPk(id, { paranoid: false });
-    if (!product) throw new Error(`Product with ID ${id} not found.`);
     const validFiles = files.filter((file) => file && file.buffer);
     if (validFiles.length) {
       const uploadPromises = validFiles.map((file) => uploadImageToCloudinary(file.buffer));
