@@ -4,6 +4,7 @@ const { uploadImages, deleteImages } = require("../controllers/image-controller"
 
 const { Product, View, Image, Category, sequelize } = require("../db");
 const { Op } = require("sequelize");
+const { createImageInDataBase } = require("./image-util");
 
 const orderOptions = {
   "most popular": [[{ model: View, as: "view" }, "counter", "DESC"]],
@@ -71,9 +72,14 @@ const addProductAssociations = async ({ id, category, images }) => {
     await createView(id);
     const product = await Product.findByPk(id);
 
-    if (images) {
-      const imagesInstances = await uploadImages(id, images);
+    if (images && images.length) {
+      const imagesInstances = await uploadImages(images);
       await product.addImages(imagesInstances);
+    } else {
+      const imageInstance = await createImageInDataBase(
+        "https://lh5.googleusercontent.com/proxy/r3NcrOciq9UC0Zk-ARYD8AaIBJvvTv_gnH-Nz6gn3w7KrVP8GzUNvPciRFwm9EBFe6qPWTkzZWebSBtGM3t0WxaPVZIiD7e593MYklTVj6zvj2U0CDMzMrp05fC40JttzTIuHFCu32hhtG7xRnSaEctjkQKldC-hOqswFn_VHo6hoTJ9bLO8SbexXOaESYbt99VCZbfZzoy2"
+      );
+      await product.addImage(imageInstance);
     }
 
     if (category) {
