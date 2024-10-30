@@ -36,8 +36,7 @@ const getProductData = ({
   const where = {
     ...(onlyDeleted ? { deletedAt: { [Op.ne]: null } } : {}),
     ...(name && { [Op.or]: [{ name: { [Op.iLike]: `%${name}%` } }] }),
-    ...(minPrice && { priceArs: { [Op.gte]: parseFloat(minPrice) } }),
-    ...(maxPrice && { priceArs: { [Op.lte]: parseFloat(maxPrice) } }),
+    ...(minPrice || maxPrice ? { priceArs: { ...(minPrice ? { [Op.gte]: parseFloat(minPrice) } : {}), ...(maxPrice ? { [Op.lte]: parseFloat(maxPrice) } : {}) } } : {}),
     ...(category && { "$category.name$": { [Op.iLike]: `%${category}%` } }),
   };
 
