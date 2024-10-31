@@ -94,12 +94,12 @@ const addProductAssociations = async ({ id, category, images }) => {
 const setProductAssociations = async ({ id, category, images, imagesToDelete }) => {
   try {
     if (imagesToDelete) await deleteImages(imagesToDelete);
-
     const product = await Product.findByPk(id, { paranoid: false });
 
-    if (images && typeof images === "object") {
-      const imagesInstances = await uploadImages(id, images);
+    if (Array.isArray(images) && images.length > 0) {
+      const imagesInstances = await uploadImages(images);
       await product.addImages(imagesInstances);
+    } else {
     }
 
     if (category) {
@@ -111,6 +111,8 @@ const setProductAssociations = async ({ id, category, images, imagesToDelete }) 
     throw new Error(`Error setting associations: ${error.message}`);
   }
 };
+
+
 
 module.exports = {
   getProductData,

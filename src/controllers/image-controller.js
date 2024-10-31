@@ -1,4 +1,4 @@
-const { Image, Product } = require("../db");
+const { Image } = require("../db");
 const {
   uploadImageToCloudinary,
   deleteImageFromCloudinary,
@@ -27,19 +27,23 @@ const uploadImages = async (files) => {
 
 const deleteImages = async (imagesToDelete) => {
   try {
-    if (imagesToDelete.length)
+    if (imagesToDelete.length) {
       await Promise.all(
-        imagesToDelete
-          .map((image) => JSON.parse(image))
-          .map(async (image) => {
-            await deleteImageFromCloudinary(image.publicId);
-            await Image.destroy({ where: { id: image.id } });
-          })
+        imagesToDelete.map(async (image) => {
+          const parsedImage = JSON.parse(image);
+          if (!parsedImage.publicId) {
+            await Image.destroy({ where: { id: parsedImage.id } });
+            return;
+          }
+          await deleteImageFromCloudinary(parsedImage.publicId);
+          await Image.destroy({ where: { id: parsedImage.id } });
+        })
       );
+    }
     return "Images deleted successfully";
   } catch (error) {
     console.error("Error deleting image:", error);
-    throw new Error(`Error deleting image: ${error}`);
+    throw new Error(`Error deleting image: ${error.message}`);
   }
 };
 
