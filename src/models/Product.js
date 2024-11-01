@@ -21,11 +21,11 @@ module.exports = (sequelize) => {
       },
       priceArs: {
         type: DataTypes.DECIMAL(10, 2),
-        allowNull: false,
+        allowNull: true,
       },
       priceUsd: {
         type: DataTypes.DECIMAL(10, 2),
-        allowNull: false,
+        allowNull: true,
       },
       priceWholesale: {
         type: DataTypes.DECIMAL(10, 2),
