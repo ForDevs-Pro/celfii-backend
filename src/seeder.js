@@ -1,9 +1,19 @@
+<<<<<<< Updated upstream
 const { createProductController } = require('./controllers/product-controller');
 const { createRoleController } = require('./controllers/roleController');
 const { getSheetDataService } = require('./services/api-service');
 const { createCategoryController } = require('./controllers/category-controller');
 const { createUserController } = require('./controllers/userController');
 const { Category, Role, Product, View } = require('./db');
+=======
+const { getSheetDataService } = require("./services/api-service");
+const { createUserController } = require("./controllers/user-controller");
+const { createRoleController } = require("./controllers/role-controller");
+const { createProductController } = require("./controllers/product-controller");
+const { createCategoryController } = require("./controllers/category-controller");
+const { createDollarEntryController } = require("./controllers/dollar-controller");
+const { Category, Role, Product, View } = require("./db");
+>>>>>>> Stashed changes
 
 const normalizeNumber = (value) => {
   if (typeof value === 'string') {
@@ -23,6 +33,15 @@ const createRoles = async (roles) => {
     }
   }
   console.log(`Roles Admin y Master creado correctamente.`);
+};
+
+const createDollarEntry = async (rate) => {
+  try {
+    await createDollarEntryController(rate)
+    console.log(`Tasa de cambio del dólar creada con valor: ${rate}`);
+  } catch (error) {
+    console.error("Error al crear o actualizar la tasa de cambio del dólar:", error.message);
+  }
 };
 
 const createCategories = async (categories) => {
@@ -137,6 +156,7 @@ const createSeeders = async () => {
       categories.push('Equipos');
     }
 
+    await createDollarEntry(1300)
     await createCategories(categories);
     await createProducts(sheetData);
     await updateViewCounters();

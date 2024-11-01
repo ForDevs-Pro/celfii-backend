@@ -1,8 +1,13 @@
 const { DataTypes } = require('sequelize');
 
 module.exports = (sequelize) => {
+<<<<<<< Updated upstream
   sequelize.define(
     'Product',
+=======
+  const Product = sequelize.define(
+    "Product",
+>>>>>>> Stashed changes
     {
       id: {
         type: DataTypes.STRING,
@@ -27,6 +32,21 @@ module.exports = (sequelize) => {
         type: DataTypes.DECIMAL(10, 2),
         allowNull: false,
       },
+<<<<<<< Updated upstream
+=======
+      priceWholesale: {
+        type: DataTypes.DECIMAL(12, 2),
+        allowNull: true,
+      },
+      costUsd: {
+        type: DataTypes.DECIMAL(10, 2),
+        allowNull: true,
+      },
+      costArs: {
+        type: DataTypes.DECIMAL(10, 2),
+        allowNull: true,
+      },
+>>>>>>> Stashed changes
       stock: {
         type: DataTypes.INTEGER,
         allowNull: false,
@@ -52,4 +72,16 @@ module.exports = (sequelize) => {
     },
     { timestamps: true, paranoid: true }
   );
+
+  Product.addHook("beforeSave", async (product) => {
+    const dollar = await sequelize.models.Dollar.findOne();
+
+    product.costArs = product.costUsd * dollar.rate;
+    product.priceUsd = product.costUsd * 2 
+    product.priceArs = product.costUsd * 2 * dollar.rate;
+    product.priceWholesale = product.costUsd * 1.5 * dollar.rate;
+  });
+
+  return Product;
 };
+
