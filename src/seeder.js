@@ -1,11 +1,3 @@
-<<<<<<< Updated upstream
-const { createProductController } = require('./controllers/product-controller');
-const { createRoleController } = require('./controllers/roleController');
-const { getSheetDataService } = require('./services/api-service');
-const { createCategoryController } = require('./controllers/category-controller');
-const { createUserController } = require('./controllers/userController');
-const { Category, Role, Product, View } = require('./db');
-=======
 const { getSheetDataService } = require("./services/api-service");
 const { createUserController } = require("./controllers/user-controller");
 const { createRoleController } = require("./controllers/role-controller");
@@ -13,7 +5,6 @@ const { createProductController } = require("./controllers/product-controller");
 const { createCategoryController } = require("./controllers/category-controller");
 const { createDollarEntryController } = require("./controllers/dollar-controller");
 const { Category, Role, Product, View } = require("./db");
->>>>>>> Stashed changes
 
 const normalizeNumber = (value) => {
   if (typeof value === 'string') {
