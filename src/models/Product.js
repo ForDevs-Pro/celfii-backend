@@ -1,19 +1,13 @@
-const { DataTypes } = require('sequelize');
+const { DataTypes, UUIDV4 } = require('sequelize');
 
 module.exports = (sequelize) => {
-<<<<<<< Updated upstream
-  sequelize.define(
-    'Product',
-=======
   const Product = sequelize.define(
     "Product",
->>>>>>> Stashed changes
     {
       id: {
-        type: DataTypes.STRING,
+        type: DataTypes.UUID,
+        defaultValue: DataTypes.UUIDV4,
         primaryKey: true,
-        allowNull: false,
-        unique: true,
       },
       name: {
         type: DataTypes.STRING,
@@ -32,8 +26,6 @@ module.exports = (sequelize) => {
         type: DataTypes.DECIMAL(10, 2),
         allowNull: false,
       },
-<<<<<<< Updated upstream
-=======
       priceWholesale: {
         type: DataTypes.DECIMAL(12, 2),
         allowNull: true,
@@ -46,7 +38,6 @@ module.exports = (sequelize) => {
         type: DataTypes.DECIMAL(10, 2),
         allowNull: true,
       },
->>>>>>> Stashed changes
       stock: {
         type: DataTypes.INTEGER,
         allowNull: false,
