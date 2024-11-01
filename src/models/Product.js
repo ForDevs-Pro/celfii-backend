@@ -16,7 +16,7 @@ module.exports = (sequelize) => {
       },
       description: {
         type: DataTypes.TEXT,
-        allowNull: false,
+        allowNull: true,
         defaultValue: "Sin descripción disponible",
       },
       priceArs: {
@@ -26,6 +26,18 @@ module.exports = (sequelize) => {
       priceUsd: {
         type: DataTypes.DECIMAL(10, 2),
         allowNull: false,
+      },
+      priceWholesale: {
+        type: DataTypes.DECIMAL(10, 2),
+        allowNull: true,
+      },
+      costUsd: {
+        type: DataTypes.DECIMAL(10, 2),
+        allowNull: true,
+      },
+      costArs: {
+        type: DataTypes.DECIMAL(10, 2),
+        allowNull: true,
       },
       stock: {
         type: DataTypes.INTEGER,

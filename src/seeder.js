@@ -7,8 +7,13 @@ const { Category, Role, Product, View } = require("./db");
 
 const normalizeNumber = (value) => {
   if (typeof value === "string") {
-    const cleanedValue = value.replace(/[^0-9,.-]/g, "").trim();
-    const parsedValue = parseFloat(cleanedValue.replace(/\./g, "").replace(",", "."));
+    const parsedValue = parseFloat(
+      value
+        .replace(/[^0-9,.-]/g, "")
+        .trim()
+        .replace(/\./g, "")
+        .replace(",", ".")
+    );
     return isNaN(parsedValue) ? 0 : parsedValue;
   }
   return value || 0;
@@ -22,7 +27,7 @@ const createRoles = async (roles) => {
       console.error(`Error al crear el rol ${roleName}: ${error.message}`);
     }
   }
-  console.log(`Roles Admin y Master creado correctamente.`);
+  console.log("Roles Admin y Master creados correctamente.");
 };
 
 const createCategories = async (categories) => {
@@ -33,74 +38,64 @@ const createCategories = async (categories) => {
       console.error(`Error al crear la categoría ${categoryName}: ${error.message}`);
     }
   }
-  console.log(`Categorías creadas correctamente.`);
+  console.log("Categorías creadas correctamente.");
 };
 
 const findOrCreateCategory = async (categoryName) => {
   let category = await Category.findOne({ where: { name: categoryName } });
-  if (!category) {
-    category = await createCategoryController(categoryName);
-  }
-  return category;
+  return category || createCategoryController(categoryName);
 };
 
-const createProducts = async (sheetData) => {
-  for (const product of sheetData) {
-    if (!product.id) continue;
+const createProducts = async (allProducts) => {
+  for (const product of allProducts) {
+    if (!product.idEquipo && !product.id) continue;
 
-    const categoryName = product.imei ? "Equipos" : product.category || "Otros";
+    const categoryName = product.IMEI ? "Equipos" : product.category || "Otros";
     const category = await findOrCreateCategory(categoryName);
 
-    const images =
-      product.images && product.images.includes("https")
-        ? [product.images]
-        : product.images
-        ? [
-            `https://www.appsheet.com/template/gettablefileurl?appName=NewApp-645565216&appId=79fbe012-f78c-4246-833e-28e13ab4b6f4&tableName=Articulos&fileName=${encodeURIComponent(
-              product.images
-            )}`,
-          ]
-          : [];
+    const images = product.images?.includes("https")
+      ? [product.images]
+      : product.images
+      ? [
+          `https://www.appsheet.com/template/gettablefileurl?appName=NewApp-645565216&appId=79fbe012-f78c-4246-833e-28e13ab4b6f4&tableName=Articulos&fileName=${encodeURIComponent(
+            product.images
+          )}`,
+        ]
+      : [];
 
     const productData = {
-      id: product.id,
-      name: product.name || "Producto por defecto",
+      id: product.idEquipo || product.id,
+      name: product.model || product.name || "Producto por defecto",
       description: product.description || "Sin descripción disponible",
       priceArs: normalizeNumber(product.priceArs) || 1,
       priceUsd: normalizeNumber(product.priceUsd) || 1,
+      priceWholesale: normalizeNumber(product.priceWholesale) || null,
+      costUsd: normalizeNumber(product.costUsd) || 0,
+      costArs: normalizeNumber(product.costArs) || 0,
       stock: parseInt(product.stock, 10) || 0,
       code: product.code || `CODE-${Math.floor(Math.random() * 10000)}`,
-      imei: product.imei ? product.imei.replace(/\s/g, "") : null,
+      imei: product.IMEI?.replace(/\s/g, ""),
       isDeleted: product.isDeleted === "TRUE",
       categoryId: category.id,
       images,
     };
 
     try {
-      await fetch("http://localhost:3001/products", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(productData),
-      });
+      await createProductController(productData);
     } catch (error) {
       console.error(`Error al crear el producto ${productData.name}:`, error.message);
     }
   }
+  console.log("Productos cargados con exito");
 };
-
 
 const updateViewCounters = async () => {
   try {
     const products = await Product.findAll();
-
     for (const product of products) {
       const view = await View.findOne({ where: { productId: product.id } });
-
       if (view) {
-        const randomViews = Math.floor(Math.random() * 1000);
-        view.counter = randomViews;
+        view.counter = Math.floor(Math.random() * 1000);
         await view.save();
       }
     }
@@ -123,10 +118,7 @@ const createUser = async () => {
       console.error("Rol Master no encontrado para crear el usuario.");
       return;
     }
-    const newUser = await createUserController({
-      ...masterUserData,
-      roleId: roleMaster.id,
-    });
+    const newUser = await createUserController({ ...masterUserData, roleId: roleMaster.id });
     console.log(`Usuario Master ${masterUserData.username} creado correctamente.`);
     console.log(`Rol ${roleMaster.name} asignado al usuario ${newUser.username}.`);
   } catch (error) {
@@ -137,27 +129,19 @@ const createUser = async () => {
 const createSeeders = async () => {
   try {
     const roles = ["Master", "Admin"];
-
     await createRoles(roles);
     await createUser();
 
-    const sheetData = await getSheetDataService();
+    const { articulos, stockEquipos } = await getSheetDataService();
+    const allProducts = [...articulos, ...stockEquipos];
 
-    const categories = [
-      ...new Set(
-        sheetData
-          .map((product) => product.category)
-          .filter(Boolean)
-          .map((category) => category.trim())
-      ),
-    ];
-
-    if (!categories.includes("Equipos")) {
-      categories.push("Equipos");
-    }
+    const categories = Array.from(
+      new Set(allProducts.map((p) => p.category?.trim()).filter(Boolean))
+    );
+    if (!categories.includes("Equipos")) categories.push("Equipos");
 
     await createCategories(categories);
-    await createProducts(sheetData);
+    await createProducts(allProducts);
     await updateViewCounters();
 
     console.log("Seeders cargados exitosamente");
