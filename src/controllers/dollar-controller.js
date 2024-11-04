@@ -24,8 +24,19 @@ const updateDollarController = async ({ rate, date = new Date() }) => {
     throw new Error("Error updating dollar");
   }
 };
+const getDollarController = async () => {
+  try {
+    const dollar = await Dollar.findOne(); 
+    return dollar;
+  } catch (error) {
+    console.error("Error fetching dollar:", error.message);
+    throw new Error("Error fetching dollar");
+  }
+};
+
 
 module.exports = {
   createDollarEntryController,
   updateDollarController,
+  getDollarController, 
 };
