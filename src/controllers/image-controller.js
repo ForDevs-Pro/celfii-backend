@@ -1,4 +1,4 @@
-const { Image, Product } = require("../db");
+const { Image } = require("../db");
 const {
   uploadImageToCloudinary,
   deleteImageFromCloudinary,
@@ -7,7 +7,10 @@ const {
 
 const uploadImages = async (files) => {
   try {
+    files = Array.isArray(files) ? files : [files].filter(Boolean);
+
     const validFiles = files.filter((file) => file && file.buffer);
+
     if (validFiles.length) {
       const uploadPromises = validFiles.map((file) => uploadImageToCloudinary(file.buffer));
       const uploadedImages = await Promise.all(uploadPromises);
@@ -21,21 +24,28 @@ const uploadImages = async (files) => {
     }
   } catch (error) {
     console.error("Error uploading images:", error);
-    throw new Error(`Error uploading images: ${error}`);
+    throw new Error(`Error uploading images: ${error.message}`);
   }
 };
 
 const deleteImages = async (imagesToDelete) => {
   try {
-    if (imagesToDelete.length)
+    if (imagesToDelete.length) {
       await Promise.all(
         imagesToDelete
           .map((image) => JSON.parse(image))
           .map(async (image) => {
-            await deleteImageFromCloudinary(image.publicId);
+            if (image.publicId) {
+              await deleteImageFromCloudinary(image.publicId);
+            } else {
+              console.warn(
+                `Image with id ${image.id} has no publicId, skipping Cloudinary deletion.`
+              );
+            }
             await Image.destroy({ where: { id: image.id } });
           })
       );
+    }
     return "Images deleted successfully";
   } catch (error) {
     console.error("Error deleting image:", error);

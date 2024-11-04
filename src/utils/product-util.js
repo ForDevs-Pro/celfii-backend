@@ -36,7 +36,14 @@ const getProductData = ({
   const where = {
     ...(onlyDeleted ? { deletedAt: { [Op.ne]: null } } : {}),
     ...(name && { [Op.or]: [{ name: { [Op.iLike]: `%${name}%` } }] }),
-    ...(minPrice || maxPrice ? { priceArs: { ...(minPrice ? { [Op.gte]: parseFloat(minPrice) } : {}), ...(maxPrice ? { [Op.lte]: parseFloat(maxPrice) } : {}) } } : {}),
+    ...(minPrice || maxPrice
+      ? {
+          priceArs: {
+            ...(minPrice ? { [Op.gte]: parseFloat(minPrice) } : {}),
+            ...(maxPrice ? { [Op.lte]: parseFloat(maxPrice) } : {}),
+          },
+        }
+      : {}),
     ...(category && { "$category.name$": { [Op.iLike]: `%${category}%` } }),
   };
 
@@ -98,7 +105,10 @@ const setProductAssociations = async ({ id, category, images, imagesToDelete }) 
     const product = await Product.findByPk(id, { paranoid: false });
 
     if (images && typeof images === "object") {
-      const imagesInstances = await uploadImages(id, images);
+      const imagesInstances = await uploadImages(
+        Array.isArray(images) ? images : [images].filter(Boolean)
+      );
+      
       await product.addImages(imagesInstances);
     }
 
