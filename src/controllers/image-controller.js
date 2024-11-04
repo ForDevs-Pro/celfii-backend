@@ -49,7 +49,7 @@ const deleteImages = async (imagesToDelete) => {
     return "Images deleted successfully";
   } catch (error) {
     console.error("Error deleting image:", error);
-    throw new Error(`Error deleting image: ${error}`);
+    throw new Error(`Error deleting image: ${error.message}`);
   }
 };
 
