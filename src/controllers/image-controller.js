@@ -7,7 +7,10 @@ const {
 
 const uploadImages = async (files) => {
   try {
+    files = Array.isArray(files) ? files : [files].filter(Boolean);
+
     const validFiles = files.filter((file) => file && file.buffer);
+
     if (validFiles.length) {
       const uploadPromises = validFiles.map((file) => uploadImageToCloudinary(file.buffer));
       const uploadedImages = await Promise.all(uploadPromises);
@@ -21,7 +24,7 @@ const uploadImages = async (files) => {
     }
   } catch (error) {
     console.error("Error uploading images:", error);
-    throw new Error(`Error uploading images: ${error}`);
+    throw new Error(`Error uploading images: ${error.message}`);
   }
 };
 
@@ -29,15 +32,18 @@ const deleteImages = async (imagesToDelete) => {
   try {
     if (imagesToDelete.length) {
       await Promise.all(
-        imagesToDelete.map(async (image) => {
-          const parsedImage = JSON.parse(image);
-          if (!parsedImage.publicId) {
-            await Image.destroy({ where: { id: parsedImage.id } });
-            return;
-          }
-          await deleteImageFromCloudinary(parsedImage.publicId);
-          await Image.destroy({ where: { id: parsedImage.id } });
-        })
+        imagesToDelete
+          .map((image) => JSON.parse(image))
+          .map(async (image) => {
+            if (image.publicId) {
+              await deleteImageFromCloudinary(image.publicId);
+            } else {
+              console.warn(
+                `Image with id ${image.id} has no publicId, skipping Cloudinary deletion.`
+              );
+            }
+            await Image.destroy({ where: { id: image.id } });
+          })
       );
     }
     return "Images deleted successfully";
