@@ -1,5 +1,5 @@
-const { Op } = require("sequelize");
-const { Category } = require("../db");
+const { Op } = require('sequelize');
+const { sequelize, Category } = require('../db');
 
 const getAllCategoriesController = async (name) => {
   try {
@@ -7,7 +7,22 @@ const getAllCategoriesController = async (name) => {
     if (name) {
       where = { name: { [Op.iLike]: `%${name}%` } };
     }
-    const allCategories = await Category.findAll({ where });
+    const allCategories = await Category.findAll({
+      where,
+      attributes: {
+        include: [
+          [
+            sequelize.literal(`(
+              SELECT COUNT(*)
+              FROM "Products" AS "product"
+              WHERE
+                "product"."categoryId" = "Category"."id"
+            )`),
+            "productCount",
+          ],
+        ],
+      },
+    });
     return allCategories;
   } catch (error) {
     console.error("Error fetching categories:", error);
@@ -21,7 +36,7 @@ const getCategoriesByIdController = async (id) => {
     if (!category) throw new Error(`Category with id ${id} not found`);
     return category;
   } catch (error) {
-    console.error("Error fetching category by id:", error);
+    console.error('Error fetching category by id:', error);
     throw new Error(`Error fetching category with id ${id}`);
   }
 };
@@ -33,8 +48,8 @@ const createCategoryController = async (name) => {
     });
     return category;
   } catch (error) {
-    console.error("Error creating category:", error);
-    throw new Error("Category creation failed");
+    console.error('Error creating category:', error);
+    throw new Error('Category creation failed');
   }
 };
 
@@ -50,22 +65,22 @@ const updateCategoryController = async (name, id) => {
         returning: true,
       }
     );
-    if (!updated) throw new Error("Category not found");
+    if (!updated) throw new Error('Category not found');
     return updatedCategory;
   } catch (error) {
-    console.error("Error updating category:", error);
-    throw new Error("Category update failed");
+    console.error('Error updating category:', error);
+    throw new Error('Category update failed');
   }
 };
 
 const deleteCategoryController = async (id) => {
   try {
     const deleted = await Category.destroy({ where: { id } });
-    if (!deleted) throw new Error("Category not found");
-    return "Category deleted successfully";
+    if (!deleted) throw new Error('Category not found');
+    return 'Category deleted successfully';
   } catch (error) {
-    console.error("Error deleting category:", error);
-    throw new Error("Error deleting category");
+    console.error('Error deleting category:', error);
+    throw new Error('Error deleting category');
   }
 };
 

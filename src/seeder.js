@@ -1,14 +1,19 @@
-const { getSheetDataService } = require("./services/api-service");
-const { createUserController } = require("./controllers/user-controller");
 const { createProductController } = require("./controllers/product-controller");
+const { createRoleController } = require("./controllers/role-controller");
+const { getSheetDataService } = require("./services/api-service");
 const { createCategoryController } = require("./controllers/category-controller");
-const { createDollarEntryController } = require("./controllers/dollar-controller");
+const { createUserController } = require("./controllers/user-controller");
 const { Category, Role, Product, View } = require("./db");
 
 const normalizeNumber = (value) => {
-  if (typeof value === 'string') {
-    const cleanedValue = value.replace(/[^0-9,.-]/g, '').trim();
-    const parsedValue = parseFloat(cleanedValue.replace(/\./g, '').replace(',', '.'));
+  if (typeof value === "string") {
+    const parsedValue = parseFloat(
+      value
+        .replace(/[^0-9,.-]/g, "")
+        .trim()
+        .replace(/\./g, "")
+        .replace(",", ".")
+    );
     return isNaN(parsedValue) ? 0 : parsedValue;
   }
   return value || 0;
@@ -22,7 +27,7 @@ const createRoles = async (roles) => {
       console.error(`Error al crear el rol ${roleName}: ${error.message}`);
     }
   }
-  console.log(`Roles Admin y Master creado correctamente.`);
+  console.log("Roles Admin y Master creados correctamente.");
 };
 
 const createDollarEntry = async (rate) => {
@@ -42,32 +47,41 @@ const createCategories = async (categories) => {
       console.error(`Error al crear la categoría ${categoryName}: ${error.message}`);
     }
   }
-  console.log(`Categorías creadas correctamente.`);
+  console.log("Categorías creadas correctamente.");
 };
 
 const findOrCreateCategory = async (categoryName) => {
   let category = await Category.findOne({ where: { name: categoryName } });
-  if (!category) {
-    category = await createCategoryController(categoryName);
-  }
-  return category;
+  return category || createCategoryController(categoryName);
 };
 
-const createProducts = async (sheetData) => {
-  for (const product of sheetData) {
-    const categoryName = product.imei ? 'Equipos' : product.category || 'Otros';
+const createProducts = async (allProducts) => {
+  for (const product of allProducts) {
+    if (!product.idEquipo && !product.id) continue;
+
+    const categoryName = product.IMEI ? "Equipos" : product.category || "Otros";
     const category = await findOrCreateCategory(categoryName);
 
-    
+    const images = product.images?.includes("https")
+      ? [product.images]
+      : product.images
+      ? [
+          `https://www.appsheet.com/template/gettablefileurl?appName=NewApp-645565216&appId=79fbe012-f78c-4246-833e-28e13ab4b6f4&tableName=Articulos&fileName=${encodeURIComponent(
+            product.images
+          )}`,
+        ]
+      : [];
+
     const productData = {
-      name: product.name || 'Producto por defecto',
-      description: product.description || 'Sin descripción disponible',
-      costUsd: normalizeNumber(product.costUsd),
+      name: product.model || product.name || "Producto por defecto",
+      description: product.description || "Sin descripción disponible",
+      costUsd: normalizeNumber(product.costUsd) || 0,
       stock: parseInt(product.stock, 10) || 0,
       code: product.code || `CODE-${Math.floor(Math.random() * 10000)}`,
-      imei: product.imei ? product.imei.replace(/\s/g, "") : null,
-      isDeleted: product.isDeleted === 'TRUE',
+      imei: product.IMEI?.replace(/\s/g, ""),
+      isDeleted: product.isDeleted === "TRUE",
       categoryId: category.id,
+      images,
     };
 
     try {
@@ -76,44 +90,39 @@ const createProducts = async (sheetData) => {
       console.error(`Error al crear el producto ${productData.name}:`, error);
     }
   }
+  console.log("Productos cargados con exito");
 };
 
 const updateViewCounters = async () => {
   try {
     const products = await Product.findAll();
-
     for (const product of products) {
       const view = await View.findOne({ where: { productId: product.id } });
-
       if (view) {
-        const randomViews = Math.floor(Math.random() * 1000);
-        view.counter = randomViews;
+        view.counter = Math.floor(Math.random() * 1000);
         await view.save();
       }
     }
-    console.log('Seeder de actualización de vistas ejecutado con éxito');
+    console.log("Seeder de actualización de vistas ejecutado con éxito");
   } catch (error) {
-    console.error('Error al ejecutar el seeder de actualización de vistas:', error.message);
+    console.error("Error al ejecutar el seeder de actualización de vistas:", error.message);
   }
 };
 
 const createUser = async () => {
   const masterUserData = {
-    username: 'celfii',
-    email: 'celfii@celfii.com',
-    password: 'celfii123',
+    username: "celfii",
+    email: "celfii@celfii.com",
+    password: "celfii123",
   };
 
   try {
-    const roleMaster = await Role.findOne({ where: { name: 'Master' } });
+    const roleMaster = await Role.findOne({ where: { name: "Master" } });
     if (!roleMaster) {
-      console.error('Rol Master no encontrado para crear el usuario.');
+      console.error("Rol Master no encontrado para crear el usuario.");
       return;
     }
-    const newUser = await createUserController({
-      ...masterUserData,
-      roleId: roleMaster.id,
-    });
+    const newUser = await createUserController({ ...masterUserData, roleId: roleMaster.id });
     console.log(`Usuario Master ${masterUserData.username} creado correctamente.`);
     console.log(`Rol ${roleMaster.name} asignado al usuario ${newUser.username}.`);
   } catch (error) {
@@ -123,34 +132,26 @@ const createUser = async () => {
 
 const createSeeders = async () => {
   try {
-    const roles = ['Master', 'Admin'];
-
+    const roles = ["Master", "Admin"];
     await createRoles(roles);
     await createUser();
 
-    const sheetData = await getSheetDataService();
+    const { articulos, stockEquipos } = await getSheetDataService();
+    const allProducts = [...articulos, ...stockEquipos];
 
-    const categories = [
-      ...new Set(
-        sheetData
-          .map((product) => product.category)
-          .filter(Boolean)
-          .map((category) => category.trim())
-      ),
-    ];
-
-    if (!categories.includes('Equipos')) {
-      categories.push('Equipos');
-    }
+    const categories = Array.from(
+      new Set(allProducts.map((p) => p.category?.trim()).filter(Boolean))
+    );
+    if (!categories.includes("Equipos")) categories.push("Equipos");
 
     await createDollarEntry(1300)
     await createCategories(categories);
-    await createProducts(sheetData);
+    await createProducts(allProducts);
     await updateViewCounters();
 
-    console.log('Seeders cargados exitosamente');
+    console.log("Seeders cargados exitosamente");
   } catch (error) {
-    console.error('Error al cargar seeders:', error);
+    console.error("Error al cargar seeders:", error);
   }
 };
 

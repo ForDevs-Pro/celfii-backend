@@ -1,4 +1,4 @@
-const { DataTypes, UUIDV4 } = require('sequelize');
+const { DataTypes } = require("sequelize");
 
 module.exports = (sequelize) => {
   const Product = sequelize.define(
@@ -15,16 +15,28 @@ module.exports = (sequelize) => {
       },
       description: {
         type: DataTypes.TEXT,
-        allowNull: false,
-        defaultValue: 'Sin descripción disponible',
+        allowNull: true,
+        defaultValue: "Sin descripción disponible",
       },
       priceArs: {
         type: DataTypes.DECIMAL(10, 2),
-        allowNull: false,
+        allowNull: true,
       },
       priceUsd: {
         type: DataTypes.DECIMAL(10, 2),
-        allowNull: false,
+        allowNull: true,
+      },
+      priceWholesale: {
+        type: DataTypes.DECIMAL(10, 2),
+        allowNull: true,
+      },
+      costUsd: {
+        type: DataTypes.DECIMAL(10, 2),
+        allowNull: true,
+      },
+      costArs: {
+        type: DataTypes.DECIMAL(10, 2),
+        allowNull: true,
       },
       priceWholesale: {
         type: DataTypes.DECIMAL(12, 2),
@@ -53,10 +65,10 @@ module.exports = (sequelize) => {
         validate: {
           len: {
             args: [15, 15],
-            msg: 'IMEI must be exactly 15 characters long.',
+            msg: "IMEI must be exactly 15 characters long.",
           },
           isNumeric: {
-            msg: 'IMEI must contain only numbers.',
+            msg: "IMEI must contain only numbers.",
           },
         },
       },

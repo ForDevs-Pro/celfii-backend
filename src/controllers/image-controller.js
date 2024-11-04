@@ -1,38 +1,59 @@
-const { Image, Product } = require("../db");
-const { uploadImageToCloudinary, deleteImageFromCloudinary, createImageInDataBase } = require("../utils/image-util");
+const { Image } = require("../db");
+const {
+  uploadImageToCloudinary,
+  deleteImageFromCloudinary,
+  createImageInDataBase,
+} = require("../utils/image-util");
 
-const uploadImagesController = async (id, files) => {
+const uploadImages = async (files) => {
   try {
-    const product = await Product.findByPk(id);
-    if (!product) throw new Error(`Product with ID ${id} not found.`);
-    const uploadPromises = files.map((file) => uploadImageToCloudinary(file.buffer));
-    const uploadedImages = await Promise.all(uploadPromises);
-    const createPromises = uploadedImages.map((image) => createImageInDataBase(image));
-    const imageInstances = await Promise.all(createPromises);
-    await product.addImages(imageInstances);
-    return imageInstances;
+    files = Array.isArray(files) ? files : [files].filter(Boolean);
+
+    const validFiles = files.filter((file) => file && file.buffer);
+
+    if (validFiles.length) {
+      const uploadPromises = validFiles.map((file) => uploadImageToCloudinary(file.buffer));
+      const uploadedImages = await Promise.all(uploadPromises);
+      const createPromises = uploadedImages.map((image) => createImageInDataBase(image));
+      const imageInstances = await Promise.all(createPromises);
+      return imageInstances;
+    } else {
+      const createPromises = files.map((image) => createImageInDataBase(image));
+      const imageInstances = await Promise.all(createPromises);
+      return imageInstances;
+    }
   } catch (error) {
     console.error("Error uploading images:", error);
-    throw new Error(`Error uploading images: ${error}`);
+    throw new Error(`Error uploading images: ${error.message}`);
   }
 };
 
-const deleteImagesController = async (images) => {
+const deleteImages = async (imagesToDelete) => {
   try {
-    await Promise.all(
-      images.map(async (image) => {
-        await deleteImageFromCloudinary(image.publicId);
-        await Image.destroy({ where: { id: image.id } });
-      })
-    );
+    if (imagesToDelete.length) {
+      await Promise.all(
+        imagesToDelete
+          .map((image) => JSON.parse(image))
+          .map(async (image) => {
+            if (image.publicId) {
+              await deleteImageFromCloudinary(image.publicId);
+            } else {
+              console.warn(
+                `Image with id ${image.id} has no publicId, skipping Cloudinary deletion.`
+              );
+            }
+            await Image.destroy({ where: { id: image.id } });
+          })
+      );
+    }
     return "Images deleted successfully";
   } catch (error) {
     console.error("Error deleting image:", error);
-    throw new Error(`Error deleting image: ${error}`);
+    throw new Error(`Error deleting image: ${error.message}`);
   }
 };
 
 module.exports = {
-  uploadImagesController,
-  deleteImagesController,
+  uploadImages,
+  deleteImages,
 };

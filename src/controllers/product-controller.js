@@ -29,7 +29,7 @@ const getAllProductsController = async (queries) => {
 
 const getProductByIdController = async (id) => {
   try {
-    const product = await Product.findByPk(id, { include: getProductIncludes() });
+    const product = await Product.findByPk(id, { include: getProductIncludes(), paranoid: false });
     await addView(product.id);
     if (product.imei) product.imei = formatImeiWithSpaces(product.imei);
     return product;
@@ -88,17 +88,22 @@ const updateProductByIdController = async (productData, id) => {
       },
       {
         where: { id },
-        returning: true,
-        include: getProductIncludes(),
+        paranoid: false,
       }
     );
+    if (!affectedRows) {
+      throw new Error("No se pudo actualizar el producto");
+    }
+    const updatedProduct = await Product.findOne({
+      where: { id },
+      paranoid: false,
+      include: getProductIncludes(),
+    });
 
-    if (!affectedRows) throw new Error("Product not found");
-
-    return updatedProduct[0];
+    return updatedProduct;
   } catch (error) {
-    console.error("Error updating a product", error);
-    throw new Error(`Error updating a product: ${error.message}`);
+    console.error("Error actualizando el producto", error);
+    throw new Error(`Error actualizando el producto: ${error.message}`);
   }
 };
 

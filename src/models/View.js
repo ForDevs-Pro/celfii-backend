@@ -1,9 +1,9 @@
-const { DataTypes } = require('sequelize');
-const { Product } = require("./Product")
+const { DataTypes } = require("sequelize");
+const { Product } = require("./Product");
 
 module.exports = (sequelize) => {
   sequelize.define(
-    'View',
+    "View",
     {
       id: {
         type: DataTypes.UUID,
@@ -21,7 +21,7 @@ module.exports = (sequelize) => {
         unique: true,
         references: {
           model: Product,
-          key: 'id',
+          key: "id",
         },
       },
     },

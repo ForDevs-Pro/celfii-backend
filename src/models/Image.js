@@ -20,7 +20,7 @@ module.exports = (sequelize) => {
       },
       publicId: {
         type: DataTypes.STRING,
-        allowNull: false,
+        allowNull: true,
       },
       width: {
         type: DataTypes.INTEGER,
