@@ -60,7 +60,7 @@ const createProducts = async (allProducts) => {
   for (const product of allProducts) {
     if (!product.idEquipo && !product.id) continue;
 
-    const categoryName = product.IMEI ? "Equipos" : product.category || "Otros";
+    const categoryName = product.IMEI ? "Equipos" : product.category || "Equipos";
     const category = await findOrCreateCategory(categoryName);
 
     const images = product.images?.includes("https")
