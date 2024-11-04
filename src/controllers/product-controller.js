@@ -74,17 +74,20 @@ const updateProductByIdController = async (productData, id) => {
     const dollar = await Dollar.findOne({ order: [["date", "DESC"]] });
     if (!dollar) throw new Error("Dollar rate not found");
     await setProductAssociations({ id, ...productData });
+    const imei = productData.imei ? productData.imei.replace(/\s+/g, "") : undefined;
     const [affectedRows, updatedProduct] = await Product.update(
       {
         name: productData.name,
         description: productData.description,
-        priceArs: productData.priceArs || productData.costArs * 2 || productData.costUsd * 2 * dollar.rate,
+        priceArs:
+          productData.priceArs || productData.costArs * 2 || productData.costUsd * 2 * dollar.rate,
         priceUsd: productData.priceUsd || productData.costUsd * 2,
         priceWholesale: productData.priceWholesale || productData.costUsd * 1.5 * dollar.rate,
         costArs: productData.costArs || productData.costUsd * dollar.rate,
         costUsd: productData.costUsd,
         stock: productData.stock,
         code: productData.code,
+        imei: imei,
       },
       {
         where: { id },
