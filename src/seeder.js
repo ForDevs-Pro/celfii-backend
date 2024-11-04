@@ -1,9 +1,10 @@
-const { createProductController } = require("./controllers/product-controller");
-const { createRoleController } = require("./controllers/role-controller");
-const { getSheetDataService } = require("./services/api-service");
-const { createCategoryController } = require("./controllers/category-controller");
-const { createUserController } = require("./controllers/user-controller");
 const { Category, Role, Product, View } = require("./db");
+const { getSheetDataService } = require("./services/api-service");
+const { createRoleController } = require("./controllers/role-controller");
+const { createUserController } = require("./controllers/user-controller");
+const { createProductController } = require("./controllers/product-controller");
+const { createCategoryController } = require("./controllers/category-controller");
+const { createDollarEntryController } = require("./controllers/dollar-controller");
 
 const normalizeNumber = (value) => {
   if (typeof value === "string") {
@@ -28,6 +29,15 @@ const createRoles = async (roles) => {
     }
   }
   console.log("Roles Admin y Master creados correctamente.");
+};
+
+const createDollarEntry = async (rate) => {
+  try {
+    await createDollarEntryController(rate)
+    console.log(`Tasa de cambio del dólar creada con valor: ${rate}`);
+  } catch (error) {
+    console.error("Error al crear o actualizar la tasa de cambio del dólar:", error.message);
+  }
 };
 
 const createCategories = async (categories) => {
@@ -64,14 +74,9 @@ const createProducts = async (allProducts) => {
       : [];
 
     const productData = {
-      id: product.idEquipo || product.id,
       name: product.model || product.name || "Producto por defecto",
       description: product.description || "Sin descripción disponible",
-      priceArs: null,
-      priceUsd: null,
-      priceWholesale: null,
       costUsd: normalizeNumber(product.costUsd) || 0,
-      costArs: null,
       stock: parseInt(product.stock, 10) || 0,
       code: product.code || `CODE-${Math.floor(Math.random() * 10000)}`,
       imei: product.IMEI?.replace(/\s/g, ""),
@@ -83,7 +88,7 @@ const createProducts = async (allProducts) => {
     try {
       await createProductController(productData);
     } catch (error) {
-      console.error(`Error al crear el producto ${productData.name}:`, error.message);
+      console.error(`Error al crear el producto ${productData.name}:`, error);
     }
   }
   console.log("Productos cargados con exito");
@@ -140,6 +145,7 @@ const createSeeders = async () => {
     );
     if (!categories.includes("Equipos")) categories.push("Equipos");
 
+    await createDollarEntry(1300)
     await createCategories(categories);
     await createProducts(allProducts);
     await updateViewCounters();

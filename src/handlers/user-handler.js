@@ -5,13 +5,13 @@ const {
   updateUserController,
   deleteUserController,
   restoreUserController,
-} = require("../controllers/user-controller");
+} = require('../controllers/user-controller');
 
 const createUser = async (req, res) => {
   try {
     const { username, email, password } = req.body;
     if (!username || !email || !password) {
-      return res.status(400).json({ message: "All fields are required" });
+      return res.status(400).json({ message: 'All fields are required' });
     }
     const newUser = await createUserController(req.body);
     res.status(201).json(newUser);
@@ -21,14 +21,14 @@ const createUser = async (req, res) => {
 };
 
 const getAllUsers = async (req, res) => {
-  try {
-    const { includeDeleted } = req.query;
-    const users = await getAllUsersController(includeDeleted === "true");
-    res.status(200).json(users);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
+    try {
+      const { includeDeleted } = req.query;
+      const users = await getAllUsersController(includeDeleted === 'true');
+      res.status(200).json(users);
+    } catch (error) {
+      res.status(500).json({ message: error.message });
+    }
+  };
 
 const getUserById = async (req, res) => {
   try {

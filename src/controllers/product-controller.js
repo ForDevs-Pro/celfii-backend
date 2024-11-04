@@ -1,4 +1,4 @@
-const { Product } = require("../db");
+const { Product, Dollar } = require("../db");
 const { addView } = require("./view-controller");
 const {
   getProductData,
@@ -40,15 +40,16 @@ const getProductByIdController = async (id) => {
 };
 
 const createProductController = async (productData) => {
+  const dollar = await Dollar.findOne();
   try {
     const defaults = {
       name: productData.name,
       description: productData.description,
-      priceArs: productData.priceArs,
-      priceUsd: productData.priceUsd,
-      priceWholesale: productData.priceWholesale,
       costUsd: productData.costUsd,
-      costArs: productData.costArs,
+      costArs: productData.costArs || productData.costUsd * dollar.rate,
+      priceUsd: productData.priceUsd || productData.costUsd * 2,
+      priceArs: productData.priceArs || productData.costUsd * 2 * dollar.rate,
+      priceWholesale: productData.priceWholesale || productData.costUsd * 1.5 * dollar.rate,
       stock: productData.stock,
       code: productData.code,
       imei: productData.imei,
@@ -57,14 +58,9 @@ const createProductController = async (productData) => {
 
     if (productData.categoryId) defaults.categoryId = productData.categoryId;
 
-    const [product, created] = await Product.findOrCreate({
-      where: { id: productData.id },
-      defaults,
-    });
+    const product = await Product.create(defaults);
 
-    if (!created) throw new Error("This product already exists in the database!");
-
-    await addProductAssociations(productData);
+    await addProductAssociations({ id: product.id, ...productData });
 
     return await Product.findByPk(product.id, { include: getProductIncludes() });
   } catch (error) {
@@ -75,38 +71,28 @@ const createProductController = async (productData) => {
 
 const updateProductByIdController = async (productData, id) => {
   try {
-    const existingProduct = await Product.findOne({
-      where: { id },
-      paranoid: false,
-    });
-
-    if (!existingProduct) {
-      throw new Error(`Producto con ID ${id} no encontrado`);
-    }
+    const dollar = await Dollar.findOne({ order: [["date", "DESC"]] });
+    if (!dollar) throw new Error("Dollar rate not found");
     await setProductAssociations({ id, ...productData });
-    const [affectedRows] = await Product.update(
+    const [affectedRows, updatedProduct] = await Product.update(
       {
         name: productData.name,
         description: productData.description,
         priceArs: productData.priceArs,
         priceUsd: productData.priceUsd,
+        priceWholesale: productData.costUsd * 1.5 * dollar.rate,
+        costArs: productData.costUsd * dollar.rate,
+        costUsd: productData.costUsd,
         stock: productData.stock,
         code: productData.code,
       },
       {
         where: { id },
         paranoid: false,
+        include: getProductIncludes(),
       }
     );
-    if (!affectedRows) {
-      throw new Error("No se pudo actualizar el producto");
-    }
-    const updatedProduct = await Product.findOne({
-      where: { id },
-      paranoid: false,
-      include: getProductIncludes(),
-    });
-
+    if (!affectedRows) throw new Error("No se pudo actualizar el producto");
     return updatedProduct;
   } catch (error) {
     console.error("Error actualizando el producto", error);

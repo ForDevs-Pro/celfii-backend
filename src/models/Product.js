@@ -1,14 +1,13 @@
 const { DataTypes } = require("sequelize");
 
 module.exports = (sequelize) => {
-  sequelize.define(
+  const Product = sequelize.define(
     "Product",
     {
       id: {
-        type: DataTypes.STRING,
+        type: DataTypes.UUID,
+        defaultValue: DataTypes.UUIDV4,
         primaryKey: true,
-        allowNull: false,
-        unique: true,
       },
       name: {
         type: DataTypes.STRING,
@@ -29,6 +28,18 @@ module.exports = (sequelize) => {
       },
       priceWholesale: {
         type: DataTypes.DECIMAL(10, 2),
+        allowNull: true,
+      },
+      costUsd: {
+        type: DataTypes.DECIMAL(10, 2),
+        allowNull: true,
+      },
+      costArs: {
+        type: DataTypes.DECIMAL(10, 2),
+        allowNull: true,
+      },
+      priceWholesale: {
+        type: DataTypes.DECIMAL(12, 2),
         allowNull: true,
       },
       costUsd: {
@@ -64,4 +75,16 @@ module.exports = (sequelize) => {
     },
     { timestamps: true, paranoid: true }
   );
+
+  Product.addHook("beforeSave", async (product) => {
+    const dollar = await sequelize.models.Dollar.findOne();
+
+    product.costArs = product.costUsd * dollar.rate;
+    product.priceUsd = product.costUsd * 2 
+    product.priceArs = product.costUsd * 2 * dollar.rate;
+    product.priceWholesale = product.costUsd * 1.5 * dollar.rate;
+  });
+
+  return Product;
 };
+
