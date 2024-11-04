@@ -1,6 +1,5 @@
 const { getSheetDataService } = require("./services/api-service");
 const { createUserController } = require("./controllers/user-controller");
-const { createRoleController } = require("./controllers/role-controller");
 const { createProductController } = require("./controllers/product-controller");
 const { createCategoryController } = require("./controllers/category-controller");
 const { createDollarEntryController } = require("./controllers/dollar-controller");
@@ -56,17 +55,14 @@ const findOrCreateCategory = async (categoryName) => {
 
 const createProducts = async (sheetData) => {
   for (const product of sheetData) {
-    if (!product.id) continue;
-
     const categoryName = product.imei ? 'Equipos' : product.category || 'Otros';
     const category = await findOrCreateCategory(categoryName);
 
+    
     const productData = {
-      id: product.id,
       name: product.name || 'Producto por defecto',
       description: product.description || 'Sin descripción disponible',
-      priceArs: normalizeNumber(product.priceArs) || 1,
-      priceUsd: normalizeNumber(product.priceUsd) || 1,
+      costUsd: normalizeNumber(product.costUsd),
       stock: parseInt(product.stock, 10) || 0,
       code: product.code || `CODE-${Math.floor(Math.random() * 10000)}`,
       imei: product.imei ? product.imei.replace(/\s/g, "") : null,
@@ -77,7 +73,7 @@ const createProducts = async (sheetData) => {
     try {
       await createProductController(productData);
     } catch (error) {
-      console.error(`Error al crear el producto ${productData.name}:`, error.message);
+      console.error(`Error al crear el producto ${productData.name}:`, error);
     }
   }
 };
