@@ -32,7 +32,7 @@ const getSheetDataService = async () => {
     "description",
   ];
 
-  const propsSheet2 = ["id", "imei", "name", "priceUsd", "priceArs", "images"];
+  const propsSheet2 = ["id", "IMEI", "name", "priceUsd", "priceArs", "images"];
   const spreadsheetId = process.env.GOOGLE_SHEETS_SPREADSHEET_ID;
   const ranges = ["Articulos!A:M", "Stock equipos!A:F"];
 
