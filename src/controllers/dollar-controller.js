@@ -3,14 +3,14 @@ const { Dollar } = require("../db");
 const createDollarEntryController = async (rate) => {
   try {
     await Dollar.create({ rate });
-    return 
+    return;
   } catch (error) {
     console.error("Error creating dollar:", error.message);
     throw new Error("Error creating dollar");
   }
 };
 
-const updateDollarController = async (rate, date = new Date()) => {
+const updateDollarController = async ({ rate, date = new Date() }) => {
   try {
     const dollar = await Dollar.findOne();
     if (dollar) {
