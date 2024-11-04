@@ -1,9 +1,10 @@
-const { createProductController } = require("./controllers/product-controller");
-const { createRoleController } = require("./controllers/role-controller");
-const { getSheetDataService } = require("./services/api-service");
-const { createCategoryController } = require("./controllers/category-controller");
-const { createUserController } = require("./controllers/user-controller");
 const { Category, Role, Product, View } = require("./db");
+const { getSheetDataService } = require("./services/api-service");
+const { createRoleController } = require("./controllers/role-controller");
+const { createUserController } = require("./controllers/user-controller");
+const { createProductController } = require("./controllers/product-controller");
+const { createCategoryController } = require("./controllers/category-controller");
+const { createDollarEntryController } = require("./controllers/dollar-controller");
 
 const normalizeNumber = (value) => {
   if (typeof value === "string") {

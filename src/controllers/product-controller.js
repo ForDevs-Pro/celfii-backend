@@ -89,17 +89,10 @@ const updateProductByIdController = async (productData, id) => {
       {
         where: { id },
         paranoid: false,
+        include: getProductIncludes(),
       }
     );
-    if (!affectedRows) {
-      throw new Error("No se pudo actualizar el producto");
-    }
-    const updatedProduct = await Product.findOne({
-      where: { id },
-      paranoid: false,
-      include: getProductIncludes(),
-    });
-
+    if (!affectedRows) throw new Error("No se pudo actualizar el producto");
     return updatedProduct;
   } catch (error) {
     console.error("Error actualizando el producto", error);

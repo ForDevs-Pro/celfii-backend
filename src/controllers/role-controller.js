@@ -10,8 +10,8 @@ const createRoleController = async (name) => {
   } catch (error) {
     console.error("Error creating role: " + error.message);
     throw new Error("Error creating role: " + error.message);
+  }
 };
-
 const deleteRoleController = async (name) => {
   try {
     const role = await Role.findOne({ where: { name } });
