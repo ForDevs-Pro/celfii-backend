@@ -38,18 +38,6 @@ module.exports = (sequelize) => {
         type: DataTypes.DECIMAL(10, 2),
         allowNull: true,
       },
-      priceWholesale: {
-        type: DataTypes.DECIMAL(12, 2),
-        allowNull: true,
-      },
-      costUsd: {
-        type: DataTypes.DECIMAL(10, 2),
-        allowNull: true,
-      },
-      costArs: {
-        type: DataTypes.DECIMAL(10, 2),
-        allowNull: true,
-      },
       stock: {
         type: DataTypes.INTEGER,
         allowNull: false,

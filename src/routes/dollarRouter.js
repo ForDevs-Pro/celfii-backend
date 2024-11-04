@@ -1,11 +1,10 @@
 const { Router } = require("express");
-const {
-    updateDollar
-} = require("../handlers/dollar-handler");
-
+const { updateDollar, getDollar, getDollarById } = require("../handlers/dollar-handler");
 
 const dollarRouter = Router();
 
-dollarRouter.put("/", updateDollar);
+dollarRouter.patch("/", updateDollar);
+dollarRouter.get("/", getDollar);
+dollarRouter.get("/:id", getDollarById);
 
 module.exports = dollarRouter;
