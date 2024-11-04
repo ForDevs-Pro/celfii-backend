@@ -63,16 +63,6 @@ const getProductData = ({
   return { limit, offset, order, where, include, paranoid };
 };
 
-const formatImeiWithSpaces = (imei) => {
-  const cleanedImei = imei.replace(/\s/g, "");
-  if (cleanedImei.length === 15)
-    return `${cleanedImei.slice(0, 2)} ${cleanedImei.slice(2, 8)} ${cleanedImei.slice(
-      8,
-      14
-    )} ${cleanedImei.slice(14)}`;
-  return imei;
-};
-
 const addProductAssociations = async ({ id, category, images }) => {
   try {
     await createView(id);
@@ -125,7 +115,6 @@ const setProductAssociations = async ({ id, category, images, imagesToDelete }) 
 module.exports = {
   getProductData,
   getProductIncludes,
-  formatImeiWithSpaces,
   addProductAssociations,
   setProductAssociations,
 };

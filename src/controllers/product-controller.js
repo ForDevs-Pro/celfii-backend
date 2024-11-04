@@ -3,7 +3,6 @@ const { addView } = require("./view-controller");
 const {
   getProductData,
   getProductIncludes,
-  formatImeiWithSpaces,
   setProductAssociations,
   addProductAssociations,
 } = require("../utils/product-util");
@@ -16,7 +15,6 @@ const getAllProductsController = async (queries) => {
     return {
       rows: products.rows.map((product) => {
         const data = product.dataValues;
-        if (data.imei) data.imei = formatImeiWithSpaces(data.imei);
         return data;
       }),
       count: products.count,
@@ -31,7 +29,6 @@ const getProductByIdController = async (id) => {
   try {
     const product = await Product.findByPk(id, { include: getProductIncludes(), paranoid: false });
     await addView(product.id);
-    if (product.imei) product.imei = formatImeiWithSpaces(product.imei);
     return product;
   } catch (error) {
     console.error(`Error fetching product with id ${id}`, error);
@@ -71,23 +68,22 @@ const createProductController = async (productData) => {
 
 const updateProductByIdController = async (productData, id) => {
   try {
+    console.log(productData);
     const dollar = await Dollar.findOne({ order: [["date", "DESC"]] });
     if (!dollar) throw new Error("Dollar rate not found");
     await setProductAssociations({ id, ...productData });
-    const imei = productData.imei ? productData.imei.replace(/\s+/g, "") : undefined;
     const [affectedRows, updatedProduct] = await Product.update(
       {
-        name: productData.name,
-        description: productData.description,
-        priceArs:
-          productData.priceArs || productData.costArs * 2 || productData.costUsd * 2 * dollar.rate,
-        priceUsd: productData.priceUsd || productData.costUsd * 2,
-        priceWholesale: productData.priceWholesale || productData.costUsd * 1.5 * dollar.rate,
-        costArs: productData.costArs || productData.costUsd * dollar.rate,
-        costUsd: productData.costUsd,
-        stock: productData.stock,
-        code: productData.code,
-        imei: imei,
+        name: productData.name && productData.name,
+        description: productData.description && productData.description,
+        priceArs: productData.costUsd && productData.costUsd * 2 * dollar.rate,
+        priceUsd: productData.costUsd && productData.costUsd * 2,
+        priceWholesale: productData.costUsd && productData.costUsd * 1.5 * dollar.rate,
+        costArs: productData.costUsd && productData.costUsd * dollar.rate,
+        costUsd: productData.costUsd && productData.costUsd,
+        stock: productData.stock && productData.stock,
+        code: productData.code && productData.code,
+        imei: productData.imei && productData.imei,
       },
       {
         where: { id },
