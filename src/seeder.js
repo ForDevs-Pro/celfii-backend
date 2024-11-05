@@ -76,7 +76,7 @@ const createProducts = async (allProducts) => {
     const productData = {
       name: product.model || product.name || "Producto por defecto",
       description: product.description || "Sin descripción disponible",
-      costUsd: normalizeNumber(product.costUsd) || 0,
+      costArs: normalizeNumber(product.costArs) || 0,
       stock: parseInt(product.stock, 10) || 0,
       code: product.code || `CODE-${Math.floor(Math.random() * 10000)}`,
       imei: product.IMEI?.replace(/\s/g, ""),

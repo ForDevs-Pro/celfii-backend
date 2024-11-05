@@ -58,7 +58,7 @@ module.exports = (sequelize) => {
   Product.addHook("beforeSave", async (product) => {
     const dollar = await sequelize.models.Dollar.findOne();
 
-    product.costArs = product.costUsd * dollar.rate;
+    product.costUsd = product.costArs / dollar.rate;
     product.priceUsd = product.costUsd * 2 
     product.priceArs = product.costUsd * 2 * dollar.rate;
     product.priceWholesale = product.costUsd * 1.5 * dollar.rate;
