@@ -68,22 +68,27 @@ const createProductController = async (productData) => {
 
 const updateProductByIdController = async (productData, id) => {
   try {
-    console.log(productData);
+    const { costArs, costUsd, priceArs, priceUsd, priceWholesale } = productData;
     const dollar = await Dollar.findOne({ order: [["date", "DESC"]] });
     if (!dollar) throw new Error("Dollar rate not found");
     await setProductAssociations({ id, ...productData });
+    const finalCostUsd = costUsd == 0 && Number(costArs) ? costArs / dollar.rate : Number(costUsd);
+    const finalPriceArs = priceArs == 0 && finalCostUsd ? finalCostUsd * 2 * dollar.rate : priceArs;
+    const finalPriceUsd = priceUsd == 0 && finalCostUsd ? finalCostUsd * 2 : priceUsd;
+    const finalPriceWholesale =
+      priceWholesale == 0 && finalCostUsd ? finalCostUsd * 1.5 * dollar.rate : priceWholesale;
     const [affectedRows, updatedProduct] = await Product.update(
       {
-        name: productData.name && productData.name,
-        description: productData.description && productData.description,
-        costArs: productData.costUsd && productData.costArs,
-        costUsd: productData.costUsd && productData.costArs / dollar.rate,
-        priceArs: productData.costUsd && productData.costUsd * 2 * dollar.rate,
-        priceUsd: productData.costUsd && productData.costUsd * 2,
-        priceWholesale: productData.costUsd && productData.costUsd * 1.5 * dollar.rate,
-        stock: productData.stock && productData.stock,
-        code: productData.code && productData.code,
-        imei: productData.imei && productData.imei,
+        costArs: Number(costArs) || 0,
+        costUsd: finalCostUsd || 0,
+        priceArs: finalPriceArs || 0,
+        priceUsd: finalPriceUsd || 0,
+        priceWholesale: finalPriceWholesale || 0,
+        name: productData.name,
+        stock: productData.stock,
+        imei: productData.imei,
+        code: productData.code,
+        description: productData.description,
       },
       {
         where: { id },
@@ -94,8 +99,8 @@ const updateProductByIdController = async (productData, id) => {
     if (!affectedRows) throw new Error("No se pudo actualizar el producto");
     return updatedProduct;
   } catch (error) {
-    console.error("Error actualizando el producto", error);
-    throw new Error(`Error actualizando el producto: ${error.message}`);
+    console.error(`Error updating product with id: ${id}`, error);
+    throw new Error(`Error updating product with id: ${id}: ${error.message}`);
   }
 };
 
