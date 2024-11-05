@@ -1,6 +1,7 @@
 const { Product, Dollar } = require("../db");
 const { addView } = require("./view-controller");
 const {
+  safeNumber,
   getProductData,
   getProductIncludes,
   setProductAssociations,
@@ -37,20 +38,18 @@ const getProductByIdController = async (id) => {
 };
 
 const createProductController = async (productData) => {
-  const dollar = await Dollar.findOne();
   try {
     const defaults = {
       name: productData.name,
       description: productData.description,
       costArs: productData.costArs,
-      costUsd: productData.costUsd || productData.costArs / dollar.rate,
-      priceUsd: productData.priceUsd || productData.costUsd * 2,
-      priceArs: productData.priceArs || productData.costUsd * 2 * dollar.rate,
-      priceWholesale: productData.priceWholesale || productData.costUsd * 1.5 * dollar.rate,
+      costUsd: productData.costUsd,
+      priceUsd: productData.priceUsd,
+      priceArs: productData.priceArs,
+      priceWholesale: productData.priceWholesale,
       stock: productData.stock,
       code: productData.code,
       imei: productData.imei,
-      deletedAt: productData.isDeleted ? new Date() : null,
     };
 
     if (productData.categoryId) defaults.categoryId = productData.categoryId;
@@ -68,22 +67,23 @@ const createProductController = async (productData) => {
 
 const updateProductByIdController = async (productData, id) => {
   try {
-    const { costArs, costUsd, priceArs, priceUsd, priceWholesale } = productData;
     const dollar = await Dollar.findOne({ order: [["date", "DESC"]] });
-    if (!dollar) throw new Error("Dollar rate not found");
     await setProductAssociations({ id, ...productData });
-    const finalCostUsd = costUsd == 0 && Number(costArs) ? costArs / dollar.rate : Number(costUsd);
-    const finalPriceArs = priceArs == 0 && finalCostUsd ? finalCostUsd * 2 * dollar.rate : priceArs;
-    const finalPriceUsd = priceUsd == 0 && finalCostUsd ? finalCostUsd * 2 : priceUsd;
-    const finalPriceWholesale =
-      priceWholesale == 0 && finalCostUsd ? finalCostUsd * 1.5 * dollar.rate : priceWholesale;
+    
+    const { costArs, costUsd, priceArs, priceUsd, priceWholesale } = productData;
+    const finalCostUsd = safeNumber(costUsd) || (safeNumber(costArs) ? costArs / dollar.rate : 0);
+    const finalPriceArs = safeNumber(priceArs) || (finalCostUsd ? finalCostUsd * 2 * dollar.rate : 0);
+    const finalPriceUsd = safeNumber(priceUsd) || (finalCostUsd ? finalCostUsd * 2 : 0);
+    const finalPriceWholesale = safeNumber(priceWholesale) || (finalCostUsd ? finalCostUsd * 1.5 * dollar.rate : 0);
+    console.log(typeof(finalCostUsd), typeof(finalPriceArs), typeof(finalPriceUsd), typeof(finalPriceWholesale), "asdljakjsdhkjashdjkhsad");
+    
     const [affectedRows, updatedProduct] = await Product.update(
       {
-        costArs: Number(costArs) || 0,
-        costUsd: finalCostUsd || 0,
-        priceArs: finalPriceArs || 0,
-        priceUsd: finalPriceUsd || 0,
-        priceWholesale: finalPriceWholesale || 0,
+        costArs: safeNumber(costArs),
+        costUsd: finalCostUsd,
+        priceArs: finalPriceArs,
+        priceUsd: finalPriceUsd,
+        priceWholesale: finalPriceWholesale,
         name: productData.name,
         stock: productData.stock,
         imei: productData.imei,

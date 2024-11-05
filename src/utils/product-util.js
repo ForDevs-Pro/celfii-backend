@@ -1,10 +1,15 @@
 const { createView } = require("../controllers/view-controller");
 const { createCategoryController } = require("../controllers/category-controller");
 const { uploadImages, deleteImages } = require("../controllers/image-controller");
+const { createImageInDataBase } = require("./image-util");
 
 const { Product, View, Image, Category, sequelize } = require("../db");
 const { Op } = require("sequelize");
-const { createImageInDataBase } = require("./image-util");
+
+const safeNumber = (value) => {
+  const parsedValue = parseFloat(value);
+  return isNaN(parsedValue) || parsedValue === 0 ? 0 : parsedValue;
+};
 
 const orderOptions = {
   "most popular": [[{ model: View, as: "view" }, "counter", "DESC"]],
@@ -113,6 +118,7 @@ const setProductAssociations = async ({ id, category, images, imagesToDelete }) 
 };
 
 module.exports = {
+  safeNumber,
   getProductData,
   getProductIncludes,
   addProductAssociations,

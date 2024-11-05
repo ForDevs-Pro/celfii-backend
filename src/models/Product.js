@@ -57,13 +57,25 @@ module.exports = (sequelize) => {
 
   Product.addHook("beforeSave", async (product) => {
     const dollar = await sequelize.models.Dollar.findOne();
+    const { costArs, costUsd, priceArs, priceUsd, priceWholesale } = product;
 
-    product.costUsd = product.costArs / dollar.rate;
-    product.priceUsd = product.costUsd * 2 
-    product.priceArs = product.costUsd * 2 * dollar.rate;
-    product.priceWholesale = product.costUsd * 1.5 * dollar.rate;
+    const safeNumber = (value) => {
+      const parsedValue = parseFloat(value);
+      return isNaN(parsedValue) || parsedValue === 0 ? 0 : parsedValue;
+    };
+
+    const finalCostArs = safeNumber(costArs);
+    const finalCostUsd = safeNumber(costUsd) || (finalCostArs ? finalCostArs / dollar.rate : 0);
+    const finalPriceArs = safeNumber(priceArs) || (finalCostUsd ? finalCostUsd * 2 * dollar.rate : 0);
+    const finalPriceUsd = safeNumber(priceUsd) || (finalCostUsd ? finalCostUsd * 2 : 0);
+    const finalPriceWholesale = safeNumber(priceWholesale) || (finalCostUsd ? finalCostUsd * 1.5 * dollar.rate : 0);
+
+    product.costArs = Number(finalCostArs);
+    product.costUsd = Number(finalCostUsd);
+    product.priceArs = Number(finalPriceArs);
+    product.priceUsd = Number(finalPriceUsd);
+    product.priceWholesale = Number(finalPriceWholesale);
   });
 
   return Product;
 };
-
