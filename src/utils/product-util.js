@@ -104,11 +104,11 @@ const setProductAssociations = async ({ id, category, images, imagesToDelete }) 
         Array.isArray(images) ? images : [images].filter(Boolean)
       );
       await product.addImages(imagesInstances);
-    } else {
+    } else if (!product.images || (product.images && product.images.length === 0)) {
       const imageInstance = await createImageInDataBase(
         "https://lh5.googleusercontent.com/proxy/r3NcrOciq9UC0Zk-ARYD8AaIBJvvTv_gnH-Nz6gn3w7KrVP8GzUNvPciRFwm9EBFe6qPWTkzZWebSBtGM3t0WxaPVZIiD7e593MYklTVj6zvj2U0CDMzMrp05fC40JttzTIuHFCu32hhtG7xRnSaEctjkQKldC-hOqswFn_VHo6hoTJ9bLO8SbexXOaESYbt99VCZbfZzoy2"
       );
-      await product.addImage(imageInstance);
+      await product.setImages(imageInstance);
     }
     if (category) {
       const categoryInstances = await createCategoryController(category);
