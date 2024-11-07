@@ -73,7 +73,7 @@ const addProductAssociations = async ({ id, category, images }) => {
   try {
     await createView(id);
     const product = await Product.findByPk(id);
-
+    
     if (images && images.length) {
       const imagesInstances = await uploadImages(images);
       await product.addImages(imagesInstances);
@@ -98,8 +98,8 @@ const setProductAssociations = async ({ id, category, images, imagesToDelete }) 
   try {
     if (imagesToDelete) await deleteImages(imagesToDelete);
     const product = await Product.findByPk(id, { paranoid: false });
-
-    if (images && typeof images === "object") {
+    
+    if (images && images.length && typeof images === "object") {
       const imagesInstances = await uploadImages(
         Array.isArray(images) ? images : [images].filter(Boolean)
       );

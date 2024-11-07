@@ -69,7 +69,6 @@ const createProductController = async (productData) => {
 
 const updateProductByIdController = async (productData, id) => {
   try {
-    console.log(productData);
     const dollar = await Dollar.findOne({ order: [["date", "DESC"]] });
     if (!dollar) throw new Error("Dollar rate not found");
     await setProductAssociations({ id, ...productData });
