@@ -73,6 +73,7 @@ const updateProductByIdController = async (productData, id) => {
     if (!dollar) throw new Error("Dollar rate not found");
     await setProductAssociations({ id, ...productData });
 
+    const { name, stock, imei, code, description } = productData;
     const { costArs, costUsd, priceArs, priceUsd, priceWholesale } = productData;
     const finalCostUsd = safeNumber(costUsd) || (safeNumber(costArs) ? costArs / dollar.rate : 0);
     const finalPriceArs =
@@ -89,7 +90,7 @@ const updateProductByIdController = async (productData, id) => {
         : finalCostUsd
         ? finalCostUsd * 1.5 * dollar.rate
         : 0;
-
+    
     const [affectedRows, updatedProduct] = await Product.update(
       {
         costArs: safeNumber(costArs),
@@ -97,11 +98,11 @@ const updateProductByIdController = async (productData, id) => {
         priceArs: finalPriceArs,
         priceUsd: finalPriceUsd,
         priceWholesale: finalPriceWholesale,
-        name: productData.name,
-        stock: productData.stock,
-        imei: productData.imei,
-        code: productData.code,
-        description: productData.description ? productData.description : "Sin descripción disponible",
+        name: name,
+        stock: stock,
+        imei: imei,
+        code: code,
+        description: JSON.parse(description) ? JSON.parse(description) : "Sin descripción disponible",
       },
       {
         where: { id },

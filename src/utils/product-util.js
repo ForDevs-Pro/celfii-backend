@@ -95,37 +95,22 @@ const addProductAssociations = async ({ id, category, images }) => {
 
 const setProductAssociations = async ({ id, category, images, imagesToDelete }) => {
   try {
-    // Cargar el producto junto con las asociaciones (como imágenes)
     const product = await Product.findByPk(id, { include: getProductIncludes(), paranoid: false });
-
+    const productImages = await product.getImages();
     if (imagesToDelete) await deleteImages(imagesToDelete);
-
-    // Convertir la instancia del producto a un objeto JSON
-    const productData = product.toJSON();
-
-    // Verificar las imágenes dentro del objeto productData
-    console.log(`HOLAAAAAAAAAAAA ${JSON.stringify(productData)}`);
-
-    // Comprobar si existen imágenes que añadir
+    
     if (images && images.length && typeof images === "object") {
       const imagesInstances = await uploadImages(
         Array.isArray(images) ? images : [images].filter(Boolean)
       );
       await product.addImages(imagesInstances);
-    } else if (
-      !productData.images ||  // Asegúrate de que productData.images es un array
-      (productData.images && !productData.images.length)  // O que es un array vacío
-    ) {
-      // Verificando las imágenes del producto antes de crear una imagen predeterminada
-      console.log(`CHAUUUUUUUUUUUUUUUUUUUU ${JSON.stringify(productData.images)}`);
-
+    } else if (productImages.length === 0) {
       const imageInstance = await createImageInDataBase(
         "https://lh5.googleusercontent.com/proxy/r3NcrOciq9UC0Zk-ARYD8AaIBJvvTv_gnH-Nz6gn3w7KrVP8GzUNvPciRFwm9EBFe6qPWTkzZWebSBtGM3t0WxaPVZIiD7e593MYklTVj6zvj2U0CDMzMrp05fC40JttzTIuHFCu32hhtG7xRnSaEctjkQKldC-hOqswFn_VHo6hoTJ9bLO8SbexXOaESYbt99VCZbfZzoy2"
       );
-      await product.setImages(imageInstance);
+      await product.addImages(imageInstance);
     }
 
-    // Si se proporciona una categoría, asignarla
     if (category) {
       const categoryInstances = await createCategoryController(category);
       await product.setCategory(categoryInstances);
