@@ -1,6 +1,7 @@
 const { Product, Dollar } = require("../db");
 const { addView } = require("./view-controller");
 const {
+  safeNumber,
   getProductData,
   getProductIncludes,
   setProductAssociations,
@@ -68,22 +69,40 @@ const createProductController = async (productData) => {
 
 const updateProductByIdController = async (productData, id) => {
   try {
-    console.log(productData);
     const dollar = await Dollar.findOne({ order: [["date", "DESC"]] });
     if (!dollar) throw new Error("Dollar rate not found");
     await setProductAssociations({ id, ...productData });
+
+    const { name, stock, imei, code, description } = productData;
+    const { costArs, costUsd, priceArs, priceUsd, priceWholesale } = productData;
+    const finalCostUsd = safeNumber(costUsd) || (safeNumber(costArs) ? costArs / dollar.rate : 0);
+    const finalPriceArs =
+      safeNumber(priceArs) !== null
+        ? safeNumber(priceArs)
+        : finalCostUsd
+        ? finalCostUsd * 2 * dollar.rate
+        : 0;
+    const finalPriceUsd =
+      safeNumber(priceUsd) !== null ? safeNumber(priceUsd) : finalCostUsd ? finalCostUsd * 2 : 0;
+    const finalPriceWholesale =
+      safeNumber(priceWholesale) !== null
+        ? safeNumber(priceWholesale)
+        : finalCostUsd
+        ? finalCostUsd * 1.5 * dollar.rate
+        : 0;
+    
     const [affectedRows, updatedProduct] = await Product.update(
       {
-        name: productData.name && productData.name,
-        description: productData.description && productData.description,
-        priceArs: productData.costUsd && productData.costUsd * 2 * dollar.rate,
-        priceUsd: productData.costUsd && productData.costUsd * 2,
-        priceWholesale: productData.costUsd && productData.costUsd * 1.5 * dollar.rate,
-        costArs: productData.costUsd && productData.costUsd * dollar.rate,
-        costUsd: productData.costUsd && productData.costUsd,
-        stock: productData.stock && productData.stock,
-        code: productData.code && productData.code,
-        imei: productData.imei && productData.imei,
+        costArs: safeNumber(costArs),
+        costUsd: finalCostUsd,
+        priceArs: finalPriceArs,
+        priceUsd: finalPriceUsd,
+        priceWholesale: finalPriceWholesale,
+        name: name,
+        stock: stock,
+        imei: imei,
+        code: code,
+        description: JSON.parse(description) ? JSON.parse(description) : "Sin descripción disponible",
       },
       {
         where: { id },

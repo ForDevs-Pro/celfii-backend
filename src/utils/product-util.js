@@ -1,10 +1,15 @@
 const { createView } = require("../controllers/view-controller");
 const { createCategoryController } = require("../controllers/category-controller");
 const { uploadImages, deleteImages } = require("../controllers/image-controller");
-
+const { createImageInDataBase } = require("./image-util");
 const { Product, View, Image, Category, sequelize } = require("../db");
 const { Op } = require("sequelize");
-const { createImageInDataBase } = require("./image-util");
+
+const safeNumber = (value) => {
+  if (Number(value) === 0) return 0;
+  const parsedValue = Number(value);
+  return !isNaN(parsedValue) ? parsedValue : null;
+};
 
 const orderOptions = {
   "most popular": [[{ model: View, as: "view" }, "counter", "DESC"]],
@@ -90,29 +95,36 @@ const addProductAssociations = async ({ id, category, images }) => {
 
 const setProductAssociations = async ({ id, category, images, imagesToDelete }) => {
   try {
+    const product = await Product.findByPk(id, { include: getProductIncludes(), paranoid: false });
+    const productImages = await product.getImages();
     if (imagesToDelete) await deleteImages(imagesToDelete);
-    const product = await Product.findByPk(id, { paranoid: false });
-
-    if (images && typeof images === "object") {
+    
+    if (images && images.length && typeof images === "object") {
       const imagesInstances = await uploadImages(
         Array.isArray(images) ? images : [images].filter(Boolean)
       );
-
       await product.addImages(imagesInstances);
-    } else {
+    } else if (productImages.length === 0) {
+      const imageInstance = await createImageInDataBase(
+        "https://lh5.googleusercontent.com/proxy/r3NcrOciq9UC0Zk-ARYD8AaIBJvvTv_gnH-Nz6gn3w7KrVP8GzUNvPciRFwm9EBFe6qPWTkzZWebSBtGM3t0WxaPVZIiD7e593MYklTVj6zvj2U0CDMzMrp05fC40JttzTIuHFCu32hhtG7xRnSaEctjkQKldC-hOqswFn_VHo6hoTJ9bLO8SbexXOaESYbt99VCZbfZzoy2"
+      );
+      await product.addImages(imageInstance);
     }
 
     if (category) {
       const categoryInstances = await createCategoryController(category);
       await product.setCategory(categoryInstances);
     }
+
   } catch (error) {
     console.error("Error setting associations:", error.message);
     throw new Error(`Error setting associations: ${error.message}`);
   }
 };
 
+
 module.exports = {
+  safeNumber,
   getProductData,
   getProductIncludes,
   addProductAssociations,
