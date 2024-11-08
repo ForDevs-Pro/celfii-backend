@@ -14,10 +14,15 @@ module.exports = (sequelize) => {
         allowNull: false,
         unique: true,
       },
+      image: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        isUrl: true,
+      },
       isActive: {
         type: DataTypes.BOOLEAN,
         allowNull: false,
-        defaultValue: true,
+        defaultValue: false,
       },
     },
     { timestamps: true }

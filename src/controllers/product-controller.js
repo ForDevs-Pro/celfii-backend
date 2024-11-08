@@ -90,19 +90,19 @@ const updateProductByIdController = async (productData, id) => {
         : finalCostUsd
         ? finalCostUsd * 1.5 * dollar.rate
         : 0;
-    
+
     const [affectedRows, updatedProduct] = await Product.update(
       {
+        name,
+        stock,
+        imei,
+        code,
         costArs: safeNumber(costArs),
         costUsd: finalCostUsd,
         priceArs: finalPriceArs,
         priceUsd: finalPriceUsd,
         priceWholesale: finalPriceWholesale,
-        name: name,
-        stock: stock,
-        imei: imei,
-        code: code,
-        description: JSON.parse(description) ? JSON.parse(description) : "Sin descripción disponible",
+        description: description !== "null" ? description : "Sin descripción disponible",
       },
       {
         where: { id },
