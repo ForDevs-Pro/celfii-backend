@@ -34,6 +34,7 @@ const deleteImages = async (imagesToDelete) => {
       await Promise.all(
         imagesToDelete
           .map((image) => JSON.parse(image))
+          .filter((parsedImage) => parsedImage && parsedImage.id)
           .map(async (image) => {
             if (image.publicId) {
               await deleteImageFromCloudinary(image.publicId);
