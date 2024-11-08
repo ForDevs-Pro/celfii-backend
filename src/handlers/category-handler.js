@@ -34,11 +34,11 @@ const getCategoryById = async (req, res) => {
 
 const createCategory = async (req, res) => {
   try {
+    const file = req.file;
     const { name } = req.body;
-    if (!name) {
-      return res.status(400).json({ error: "Name is required" });
-    }
-    const newCategory = await createCategoryController(name);
+    
+    if (!name) return res.status(400).json({ error: "Name is required" });
+    const newCategory = await createCategoryController({ name, image: file });
     res.status(200).json(newCategory);
   } catch (error) {
     console.error(`Error creating a category:`, error);
@@ -50,11 +50,9 @@ const updateCategory = async (req, res) => {
   try {
     const { name } = req.body;
     const { id } = req.params;
-
-    if (!name || !id) {
-      return res.status(400).json({ error: "Name and ID is required" });
-    }
-    const response = await updateCategoryController(name, id);
+    const file = req.file ? req.file.buffer : null;
+    if (!name || !id) return res.status(400).json({ error: "Name and ID is required" });
+    const response = await updateCategoryController({ id, name, image: file });
     res.status(200).json(response);
   } catch (error) {
     res.status(500).json({ error: error.message });

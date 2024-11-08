@@ -6,54 +6,39 @@ const { createProductController } = require("./controllers/product-controller");
 const { createCategoryController } = require("./controllers/category-controller");
 const { createDollarEntryController } = require("./controllers/dollar-controller");
 
-const normalizeNumber = (value) => {
-  if (typeof value === "string") {
-    const parsedValue = parseFloat(
-      value
-        .replace(/[^0-9,.-]/g, "")
-        .trim()
-        .replace(/\./g, "")
-        .replace(",", ".")
-    );
-    return isNaN(parsedValue) ? 0 : parsedValue;
-  }
-  return value || 0;
-};
+const normalizeNumber = (value) =>
+  typeof value === "string"
+    ? parseFloat(value.replace(/[^0-9,.-]/g, "").replace(",", ".")) || 0
+    : value || 0;
 
 const createRoles = async (roles) => {
   for (const roleName of roles) {
     try {
       await createRoleController(roleName);
+      console.log(`Rol ${roleName} creado correctamente.`);
     } catch (error) {
       console.error(`Error al crear el rol ${roleName}: ${error.message}`);
     }
   }
-  console.log("Roles Admin y Master creados correctamente.");
 };
 
 const createDollarEntry = async (rate) => {
   try {
-    await createDollarEntryController(rate)
+    await createDollarEntryController(rate);
     console.log(`Tasa de cambio del dólar creada con valor: ${rate}`);
   } catch (error) {
-    console.error("Error al crear o actualizar la tasa de cambio del dólar:", error.message);
+    console.error("Error al crear la tasa de cambio del dólar:", error.message);
   }
 };
 
 const createCategories = async (categories) => {
-  for (const categoryName of categories) {
+  for (const { name } of categories) {
     try {
-      await createCategoryController(categoryName);
+      await createCategoryController({ name });
     } catch (error) {
-      console.error(`Error al crear la categoría ${categoryName}: ${error.message}`);
+      console.error(`Error al crear la categoría ${name}: ${error.message}`);
     }
   }
-  console.log("Categorías creadas correctamente.");
-};
-
-const findOrCreateCategory = async (categoryName) => {
-  let category = await Category.findOne({ where: { name: categoryName } });
-  return category || createCategoryController(categoryName);
 };
 
 const createProducts = async (allProducts) => {
@@ -61,7 +46,7 @@ const createProducts = async (allProducts) => {
     if (!product.idEquipo && !product.id) continue;
 
     const categoryName = product.IMEI ? "Equipos" : product.category || "Equipos";
-    const category = await findOrCreateCategory(categoryName);
+    const [category] = await Category.findOrCreate({ where: { name: categoryName } });
 
     const images = product.images?.includes("https")
       ? [product.images]
@@ -76,7 +61,7 @@ const createProducts = async (allProducts) => {
     const productData = {
       name: product.model || product.name || "Producto por defecto",
       description: product.description || "Sin descripción disponible",
-      costUsd: normalizeNumber(product.costUsd) || 0,
+      costUsd: normalizeNumber(product.costUsd),
       stock: parseInt(product.stock, 10) || 0,
       code: product.code || `CODE-${Math.floor(Math.random() * 10000)}`,
       imei: product.IMEI?.replace(/\s/g, ""),
@@ -88,10 +73,9 @@ const createProducts = async (allProducts) => {
     try {
       await createProductController(productData);
     } catch (error) {
-      console.error(`Error al crear el producto ${productData.name}:`, error);
+      console.error(`Error al crear el producto ${productData.name}: ${error.message}`);
     }
   }
-  console.log("Productos cargados con exito");
 };
 
 const updateViewCounters = async () => {
@@ -104,28 +88,24 @@ const updateViewCounters = async () => {
         await view.save();
       }
     }
-    console.log("Seeder de actualización de vistas ejecutado con éxito");
+    console.log("Vistas actualizadas con éxito.");
   } catch (error) {
-    console.error("Error al ejecutar el seeder de actualización de vistas:", error.message);
+    console.error("Error al actualizar las vistas:", error.message);
   }
 };
 
 const createUser = async () => {
-  const masterUserData = {
-    username: "celfii",
-    email: "celfii@celfii.com",
-    password: "celfii123",
-  };
-
   try {
     const roleMaster = await Role.findOne({ where: { name: "Master" } });
-    if (!roleMaster) {
-      console.error("Rol Master no encontrado para crear el usuario.");
-      return;
-    }
-    const newUser = await createUserController({ ...masterUserData, roleId: roleMaster.id });
-    console.log(`Usuario Master ${masterUserData.username} creado correctamente.`);
-    console.log(`Rol ${roleMaster.name} asignado al usuario ${newUser.username}.`);
+    if (!roleMaster) throw new Error("Rol Master no encontrado.");
+
+    const newUser = await createUserController({
+      username: "celfii",
+      email: "celfii@celfii.com",
+      password: "celfii123",
+      roleId: roleMaster.id,
+    });
+    console.log(`Usuario ${newUser.username} creado correctamente.`);
   } catch (error) {
     console.error(`Error al crear el usuario Master: ${error.message}`);
   }
@@ -133,26 +113,23 @@ const createUser = async () => {
 
 const createSeeders = async () => {
   try {
-    const roles = ["Master", "Admin"];
-    await createRoles(roles);
+    await createRoles(["Master", "Admin"]);
     await createUser();
 
     const { articulos, stockEquipos } = await getSheetDataService();
     const allProducts = [...articulos, ...stockEquipos];
-
     const categories = Array.from(
-      new Set(allProducts.map((p) => p.category?.trim()).filter(Boolean))
+      new Set(allProducts.map((p) => ({ name: p.category?.trim() || "Equipos" })))
     );
-    if (!categories.includes("Equipos")) categories.push("Equipos");
 
-    await createDollarEntry(1300)
+    await createDollarEntry(1300);
     await createCategories(categories);
     await createProducts(allProducts);
     await updateViewCounters();
 
-    console.log("Seeders cargados exitosamente");
+    console.log("Seeders cargados exitosamente.");
   } catch (error) {
-    console.error("Error al cargar seeders:", error);
+    console.error("Error al cargar seeders:", error.message);
   }
 };
 
